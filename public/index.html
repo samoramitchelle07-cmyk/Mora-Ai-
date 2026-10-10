@@ -1,0 +1,1905 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b0d12">
+<title>Mora AI — Personal AI Workspace</title>
+
+<style>
+:root {
+    color-scheme: dark;
+    --bg: #090b10;
+    --panel: #11141c;
+    --panel2: #171b25;
+    --line: #292f3b;
+    --text: #eef1f8;
+    --muted: #929bac;
+    --accent: #9be7d7;
+    --accent2: #8bb8ff;
+    --danger: #ff9d9d;
+    --radius: 18px;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background:
+        radial-gradient(ellipse at 50% -15%, #1a2630 0, transparent 42%),
+        var(--bg);
+    color: var(--text);
+    font: 15px/1.5 Inter, ui-sans-serif, system-ui, -apple-system,
+        BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    min-height: 100vh;
+}
+
+button,
+input,
+textarea,
+select {
+    font: inherit;
+}
+
+button {
+    cursor: pointer;
+}
+
+button:disabled {
+    opacity: .5;
+    cursor: wait;
+}
+
+.app {
+    max-width: 1440px;
+    margin: auto;
+    padding: 18px;
+    display: grid;
+    grid-template-columns: 250px minmax(0, 1fr);
+    gap: 18px;
+    min-height: 100vh;
+}
+
+.sidebar,
+.main-card,
+.workspace {
+    background: rgba(17, 20, 28, .92);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+}
+
+.sidebar {
+    padding: 18px;
+    height: calc(100vh - 36px);
+    position: sticky;
+    top: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    font-weight: 750;
+    font-size: 19px;
+    letter-spacing: -.4px;
+}
+
+.logo {
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    background: linear-gradient(135deg, var(--accent), #7a9dff);
+    color: #0b1116;
+    font-weight: 900;
+}
+
+.subbrand {
+    color: var(--muted);
+    font-size: 12px;
+    margin-top: 2px;
+}
+
+.side-btn,
+.small-btn,
+.tab,
+.primary,
+.ghost {
+    border: 1px solid var(--line);
+    border-radius: 11px;
+    background: var(--panel2);
+    color: var(--text);
+    padding: 10px 12px;
+}
+
+.side-btn {
+    width: 100%;
+    text-align: left;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+}
+
+.side-btn:hover,
+.small-btn:hover,
+.tab:hover,
+.ghost:hover {
+    border-color: #4b5a6e;
+}
+
+.side-label {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    margin: 6px 0;
+}
+
+.side-list {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    overflow: auto;
+}
+
+.side-item {
+    font-size: 13px;
+    color: #c7cddb;
+    border: 0;
+    background: transparent;
+    text-align: left;
+    padding: 8px;
+    border-radius: 8px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.side-item:hover {
+    background: #1a202b;
+}
+
+.side-bottom {
+    margin-top: auto;
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.status-dot {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    background: #6de1b5;
+    border-radius: 50%;
+    margin-right: 7px;
+}
+
+.main {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    padding: 3px 2px;
+}
+
+.top-title {
+    font-size: 13px;
+    color: var(--muted);
+}
+
+.top-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.main-card {
+    padding: clamp(18px, 4vw, 42px);
+    min-height: 380px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.hero {
+    text-align: center;
+    max-width: 790px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+.eyebrow {
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
+    border: 1px solid #35434a;
+    border-radius: 99px;
+    padding: 5px 11px;
+    color: var(--accent);
+    font-size: 12px;
+    margin-bottom: 18px;
+}
+
+.hero h1 {
+    font-size: clamp(32px, 5vw, 54px);
+    line-height: 1.08;
+    letter-spacing: -2px;
+    margin: 0 0 14px;
+}
+
+.gradient {
+    background: linear-gradient(100deg, #f2f4fa 10%, #a8e8db 55%, #8bb8ff);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+}
+
+.hero p {
+    color: var(--muted);
+    margin: 0 auto 24px;
+    max-width: 590px;
+}
+
+.prompt-box {
+    background: #0b0e14;
+    border: 1px solid #333b48;
+    border-radius: 17px;
+    padding: 13px;
+    text-align: left;
+    box-shadow: 0 16px 60px #0003;
+}
+
+.prompt-box:focus-within {
+    border-color: #6eaaa3;
+    box-shadow: 0 0 0 3px #9be7d714;
+}
+
+.prompt-box textarea {
+    display: block;
+    width: 100%;
+    resize: vertical;
+    min-height: 95px;
+    max-height: 300px;
+    background: transparent;
+    border: 0;
+    outline: 0;
+    color: var(--text);
+    padding: 8px;
+    font-size: 15px;
+}
+
+.prompt-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    border-top: 1px solid #242a34;
+    padding-top: 12px;
+}
+
+.prompt-controls select,
+.token-input {
+    background: #151a23;
+    color: var(--text);
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    padding: 9px;
+    max-width: 100%;
+}
+
+.spacer {
+    flex: 1;
+}
+
+.primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #071410;
+    font-weight: 750;
+    padding: 10px 17px;
+}
+
+.primary:hover {
+    filter: brightness(1.06);
+}
+
+.suggestions {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 9px;
+    margin-top: 14px;
+}
+
+.suggestion {
+    background: #11151e;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    color: #c6ccd7;
+    text-align: left;
+    padding: 12px;
+    font-size: 12px;
+    min-height: 74px;
+}
+
+.suggestion strong {
+    display: block;
+    color: var(--text);
+    font-size: 13px;
+    margin-bottom: 4px;
+}
+
+.suggestion:hover {
+    border-color: #647c85;
+    transform: translateY(-1px);
+}
+
+.conversation {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.message {
+    border: 1px solid var(--line);
+    background: var(--panel);
+    border-radius: 14px;
+    padding: 16px;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.message.user {
+    background: #151b25;
+    border-color: #303c4d;
+}
+
+.message .role {
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+}
+
+.message-body {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.progress {
+    display: none;
+    border: 1px solid #34434a;
+    background: #101b1c;
+    border-radius: 12px;
+    padding: 12px 14px;
+    color: #b8e7dc;
+    font-size: 13px;
+}
+
+.progress.visible {
+    display: block;
+}
+
+.workspace {
+    display: none;
+    overflow: hidden;
+}
+
+.workspace.visible {
+    display: block;
+}
+
+.workspace-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--line);
+}
+
+.workspace-title {
+    font-weight: 700;
+    margin-right: auto;
+}
+
+.tab {
+    padding: 7px 11px;
+    font-size: 12px;
+}
+
+.tab.active {
+    background: #263d3b;
+    border-color: #547a73;
+    color: #c9fff1;
+}
+
+.workspace-body {
+    min-height: 240px;
+}
+
+.pane {
+    display: none;
+    padding: 15px;
+}
+
+.pane.active {
+    display: block;
+}
+
+.preview-frame {
+    display: block;
+    width: 100%;
+    height: min(65vh, 620px);
+    background: white;
+    border: 0;
+    border-radius: 10px;
+}
+
+.files-list {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+}
+
+.file-card {
+    border: 1px solid var(--line);
+    border-radius: 11px;
+    overflow: hidden;
+}
+
+.file-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    background: #171b24;
+}
+
+.file-name {
+    font-size: 13px;
+    font-weight: 650;
+    flex: 1;
+    overflow-wrap: anywhere;
+}
+
+.code {
+    white-space: pre;
+    overflow: auto;
+    max-height: 420px;
+    padding: 14px;
+    margin: 0;
+    background: #090c11;
+    color: #d5e3e7;
+    font: 12px/1.55 ui-monospace, SFMono-Regular, Consolas, monospace;
+}
+
+.terminal {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    background: #080a0e;
+    border-radius: 10px;
+    padding: 15px;
+    color: #b9e6cf;
+    font: 12px/1.6 ui-monospace, monospace;
+    min-height: 120px;
+}
+
+.empty {
+    color: var(--muted);
+    padding: 22px;
+    text-align: center;
+    font-size: 13px;
+}
+
+.workspace-foot {
+    padding: 10px 14px;
+    border-top: 1px solid var(--line);
+    font-size: 11px;
+    color: var(--muted);
+}
+
+.modal-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: #000a;
+    z-index: 10;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+}
+
+.modal-backdrop.open {
+    display: flex;
+}
+
+.modal {
+    width: min(620px, 100%);
+    max-height: 80vh;
+    overflow: auto;
+    background: #11151e;
+    border: 1px solid #343c49;
+    border-radius: 18px;
+    padding: 18px;
+}
+
+.modal-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.modal h2 {
+    font-size: 18px;
+    margin: 0;
+}
+
+.modal-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.project-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid var(--line);
+    border-radius: 11px;
+    padding: 11px;
+}
+
+.project-meta {
+    flex: 1;
+    min-width: 0;
+}
+
+.project-meta strong {
+    display: block;
+    overflow-wrap: anywhere;
+}
+
+.project-meta small {
+    color: var(--muted);
+}
+
+.danger {
+    color: var(--danger);
+}
+
+.toast {
+    position: fixed;
+    bottom: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #e9fff8;
+    color: #10211b;
+    border-radius: 11px;
+    padding: 11px 15px;
+    box-shadow: 0 8px 40px #0008;
+    display: none;
+    z-index: 20;
+    max-width: 90vw;
+}
+
+.toast.show {
+    display: block;
+}
+
+.footnote {
+    text-align: center;
+    color: #657080;
+    font-size: 11px;
+    padding: 0 12px 12px;
+}
+
+.hidden {
+    display: none !important;
+}
+
+@media(max-width:900px) {
+    .app {
+        grid-template-columns: 1fr;
+        padding: 10px;
+    }
+
+    .sidebar {
+        position: static;
+        height: auto;
+        padding: 12px;
+        gap: 12px;
+    }
+
+    .sidebar .side-label,
+    .sidebar .side-list,
+    .sidebar .side-bottom {
+        display: none;
+    }
+
+    .sidebar-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .sidebar-head .side-btn {
+        width: auto;
+    }
+
+    .suggestions {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .main-card {
+        min-height: 340px;
+    }
+
+    .topbar {
+        align-items: flex-start;
+    }
+
+    .app {
+        gap: 10px;
+    }
+}
+
+@media(max-width:520px) {
+    .top-title {
+        display: none;
+    }
+
+    .suggestions {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .suggestion {
+        padding: 10px;
+    }
+
+    .prompt-controls select {
+        max-width: 120px;
+    }
+
+    .small-btn {
+        padding: 8px;
+    }
+
+    .hero h1 {
+        letter-spacing: -1.2px;
+    }
+
+    .workspace-head {
+        gap: 5px;
+    }
+
+    .tab {
+        padding: 7px 8px;
+    }
+
+    .prompt-box textarea {
+        min-height: 110px;
+    }
+}
+</style>
+</head>
+
+<body>
+<div class="app">
+
+<aside class="sidebar">
+    <div class="sidebar-head">
+        <div class="brand">
+            <div class="logo">M</div>
+            <div>
+                Mora AI
+                <div class="subbrand">Personal AI workspace</div>
+            </div>
+        </div>
+        <button id="newBtn" class="side-btn" style="width:auto">＋ New</button>
+    </div>
+
+    <button id="projectsBtn" class="side-btn">
+        ▦ <span>Projects <span id="projectCount">0</span></span><span>›</span>
+    </button>
+
+    <button id="historyBtn" class="side-btn">
+        ◷ <span>Recent activity</span><span>›</span>
+    </button>
+
+    <div>
+        <div class="side-label">Saved projects</div>
+        <div id="sidebarProjects" class="side-list">
+            <div class="empty">No projects saved yet.</div>
+        </div>
+    </div>
+
+    <div class="side-bottom">
+        <div>
+            <span class="status-dot"></span>
+            <span id="healthText">Checking backend…</span>
+        </div>
+        <div style="margin-top:8px">Live streaming · Canvas · Python sandbox</div>
+    </div>
+</aside>
+
+<main class="main">
+
+<header class="topbar">
+    <div class="top-title">A focused workspace for building, testing and learning.</div>
+    <div class="top-actions">
+        <button id="settingsBtn" class="small-btn">⚙ Settings</button>
+        <button id="refreshProjectsBtn" class="small-btn">↻ Refresh</button>
+    </div>
+</header>
+
+<section id="heroCard" class="main-card">
+    <div class="hero">
+        <div class="eyebrow">✦ Your ideas, into working projects</div>
+        <h1>What are we <span class="gradient">building today?</span></h1>
+        <p>Ask Mora AI to build an interface, solve a coding problem, debug an error, or explain a difficult concept.</p>
+
+        <form id="promptForm" class="prompt-box">
+            <textarea id="prompt" maxlength="12000" placeholder="Describe what you want to create…" required></textarea>
+
+            <div class="prompt-controls">
+                <select id="mode" aria-label="Task mode">
+                    <option value="general">General</option>
+                    <option value="coding">Coding</option>
+                    <option value="website">Website / Canvas</option>
+                    <option value="debugging">Debugging</option>
+                    <option value="research">Research</option>
+                    <option value="security">Authorized security review</option>
+                </select>
+
+                <span class="spacer"></span>
+                <button class="primary" id="sendBtn" type="submit">Run with Mora ↗</button>
+            </div>
+        </form>
+
+        <div class="suggestions">
+            <button class="suggestion" data-prompt="Build a polished, responsive landing page for a modern business. Include complete HTML, CSS and JavaScript with a live preview.">
+                <strong>✧ Build a website</strong>
+                Design a responsive interface
+            </button>
+
+            <button class="suggestion" data-prompt="Review this code for bugs, explain the likely causes, and return complete corrected files. Ask me to paste the code if it is missing.">
+                <strong>⌘ Debug code</strong>
+                Find and fix a problem
+            </button>
+
+            <button class="suggestion" data-prompt="Create a small Python program to calculate compound interest. Explain the formula and request a safe sandbox test.">
+                <strong>▶ Test Python</strong>
+                Run a small safe script
+            </button>
+
+            <button class="suggestion" data-prompt="Explain how to structure a secure Express application with input validation, authentication, rate limiting and safe error handling.">
+                <strong>◇ Learn a concept</strong>
+                Understand it step by step
+            </button>
+        </div>
+    </div>
+</section>
+
+<section id="conversation" class="conversation" aria-live="polite"></section>
+
+<div id="progress" class="progress">Mora AI is getting ready…</div>
+
+<section id="workspace" class="workspace">
+    <div class="workspace-head">
+        <div class="workspace-title">Workspace</div>
+        <button class="tab active" data-pane="preview">Preview</button>
+        <button class="tab" data-pane="files">Files <span id="fileCount">0</span></button>
+        <button class="tab" data-pane="terminal">Output</button>
+        <button id="testPreviewBtn" class="small-btn">Test preview</button>
+        <button id="saveBtn" class="small-btn" disabled>Save project</button>
+        <button id="exportBtn" class="small-btn" disabled>Export ZIP</button>
+        <button id="closeWorkspaceBtn" class="small-btn">Close</button>
+    </div>
+
+    <div class="workspace-body">
+        <div id="previewPane" class="pane active">
+            <div id="previewEmpty" class="empty">Ask Mora AI to build a website or interface to see a live preview here.</div>
+            <iframe id="previewFrame" class="preview-frame hidden" title="Mora AI generated preview" sandbox="allow-scripts"></iframe>
+        </div>
+
+        <div id="filesPane" class="pane">
+            <div id="filesList" class="files-list">
+                <div class="empty">Generated files will appear here.</div>
+            </div>
+        </div>
+
+        <div id="terminalPane" class="pane">
+            <pre id="terminalOutput" class="terminal">No execution output yet.</pre>
+        </div>
+    </div>
+
+    <div class="workspace-foot">
+        Preview runs in a sandboxed iframe. Browser testing is a smoke test with external network requests blocked; generated code is not automatically deployed.
+    </div>
+</section>
+
+<div class="footnote">Mora AI can make mistakes. Review generated code before using it in production.</div>
+
+</main>
+</div>
+
+<div id="modalBackdrop" class="modal-backdrop">
+    <section class="modal">
+        <div class="modal-top">
+            <h2 id="modalTitle">Projects</h2>
+            <button id="modalClose" class="small-btn">Close ✕</button>
+        </div>
+        <div id="modalContent" class="modal-list"></div>
+    </section>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+(() => {
+    'use strict';
+
+    const $ = selector => document.querySelector(selector);
+
+    const state = {
+        files: [],
+        canvas: null,
+        terminal: '',
+        prompt: '',
+        projectId: null,
+        projectTitle: '',
+        history: [],
+        busy: false
+    };
+
+    const tokenKey = 'mora_ai_api_token';
+
+    const apiToken = () =>
+        localStorage.getItem(tokenKey) || '';
+
+    function apiHeaders(json = false) {
+        const headers = {};
+
+        if (json) {
+            headers['Content-Type'] = 'application/json';
+        }
+
+        if (apiToken()) {
+            headers.Authorization = `Bearer ${apiToken()}`;
+        }
+
+        return headers;
+    }
+
+    async function api(url, options = {}) {
+        const response = await fetch(url, {
+            ...options,
+            headers: {
+                ...apiHeaders(Boolean(options.body)),
+                ...(options.headers || {})
+            }
+        });
+
+        const contentType =
+            response.headers.get('content-type') || '';
+
+        const data = contentType.includes('application/json')
+            ? await response.json()
+            : null;
+
+        if (!response.ok) {
+            throw new Error(
+                data?.error || `Request failed (${response.status})`
+            );
+        }
+
+        return data;
+    }
+
+    function toast(message) {
+        const element = $('#toast');
+
+        element.textContent = message;
+        element.classList.add('show');
+
+        setTimeout(() => {
+            element.classList.remove('show');
+        }, 3500);
+    }
+
+    function escapeHtml(value) {
+        return String(value).replace(/[&<>"']/g, character => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;'
+        })[character]);
+    }
+
+    function addMessage(role, text) {
+        const article = document.createElement('article');
+
+        article.className = `message ${role}`;
+
+        const label = document.createElement('div');
+        label.className = 'role';
+        label.textContent = role === 'user' ? 'You' : 'Mora AI';
+
+        const body = document.createElement('div');
+        body.className = 'message-body';
+        body.textContent = text;
+
+        article.append(label, body);
+        $('#conversation').appendChild(article);
+
+        article.scrollIntoView({
+            behavior: 'smooth',
+            block: 'nearest'
+        });
+
+        return article;
+    }
+
+    function showProgress(message) {
+        $('#progress').textContent = message;
+        $('#progress').classList.add('visible');
+    }
+
+    function hideProgress() {
+        $('#progress').classList.remove('visible');
+    }
+
+    function setPane(name) {
+        document.querySelectorAll('[data-pane]').forEach(button => {
+            button.classList.toggle(
+                'active',
+                button.dataset.pane === name
+            );
+        });
+
+        ['preview', 'files', 'terminal'].forEach(pane => {
+            $(`#${pane}Pane`).classList.toggle(
+                'active',
+                pane === name
+            );
+        });
+    }
+
+    function downloadText(name, content) {
+        const blob = new Blob([content], {
+            type: 'text/plain;charset=utf-8'
+        });
+
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+
+        link.href = url;
+        link.download = name || 'mora-output.txt';
+        link.click();
+
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+
+    function renderFiles() {
+        $('#fileCount').textContent = state.files.length;
+
+        const host = $('#filesList');
+        host.replaceChildren();
+
+        if (!state.files.length) {
+            host.innerHTML =
+                '<div class="empty">No files available.</div>';
+            return;
+        }
+
+        for (const file of state.files) {
+            const card = document.createElement('div');
+            card.className = 'file-card';
+
+            const header = document.createElement('div');
+            header.className = 'file-head';
+
+            const name = document.createElement('span');
+            name.className = 'file-name';
+            name.textContent = file.path || file.name || 'Untitled file';
+
+            const download = document.createElement('button');
+            download.className = 'small-btn';
+            download.textContent = 'Download';
+
+            download.addEventListener('click', () => {
+                downloadText(
+                    file.name || file.path,
+                    file.content || ''
+                );
+            });
+
+            header.append(name, download);
+
+            const code = document.createElement('pre');
+            code.className = 'code';
+            code.textContent = file.content || '';
+
+            card.append(header, code);
+            host.append(card);
+        }
+    }
+
+    function mergeFiles(existingFiles, returnedFiles) {
+        const merged = new Map();
+
+        for (const file of existingFiles) {
+            const key = file.path || file.name;
+
+            if (key) {
+                merged.set(key, file);
+            }
+        }
+
+        for (const file of returnedFiles) {
+            const key = file.path || file.name;
+
+            if (key) {
+                merged.set(key, {
+                    ...merged.get(key),
+                    ...file
+                });
+            }
+        }
+
+        return Array.from(merged.values());
+    }
+
+    function getPreviewHtml() {
+        if (state.canvas?.html) {
+            return state.canvas.html;
+        }
+
+        const htmlFile = state.files.find(file =>
+            /\.html?$/i.test(file.path || file.name || '')
+        );
+
+        return htmlFile?.content || '';
+    }
+
+    function updatePreview() {
+        const html = getPreviewHtml();
+
+        if (html.trim()) {
+            $('#previewFrame').srcdoc = html;
+            $('#previewFrame').classList.remove('hidden');
+            $('#previewEmpty').classList.add('hidden');
+            return true;
+        }
+
+        $('#previewFrame').classList.add('hidden');
+        $('#previewEmpty').classList.remove('hidden');
+
+        return false;
+    }
+
+    function renderResult(data) {
+        // Merge returned files rather than discarding existing project files.
+        if (Array.isArray(data.files) && data.files.length) {
+            state.files = mergeFiles(state.files, data.files);
+        }
+
+        if (data.canvas) {
+            state.canvas = data.canvas;
+        } else {
+            // A changed HTML file must take precedence over an older canvas.
+            const htmlFile = state.files.find(file =>
+                /\.html?$/i.test(file.path || file.name || '')
+            );
+
+            if (htmlFile) {
+                state.canvas = {
+                    type: 'html',
+                    title: htmlFile.name || htmlFile.path,
+                    html: htmlFile.content || ''
+                };
+            }
+        }
+
+        if (typeof data.terminal === 'string') {
+            state.terminal = data.terminal;
+        }
+
+        if (data.prompt) {
+            state.prompt = data.prompt;
+        }
+
+        $('#terminalOutput').textContent =
+            state.terminal || 'No execution output for this request.';
+
+        renderFiles();
+
+        const previewLoaded = updatePreview();
+
+        $('#workspace').classList.add('visible');
+        $('#heroCard').style.minHeight = 'auto';
+
+        $('#exportBtn').disabled = !state.projectId;
+        $('#saveBtn').disabled = !state.files.length;
+
+        if (previewLoaded) {
+            setPane('preview');
+        } else {
+            setPane('files');
+        }
+
+        if (Array.isArray(data.steps) && data.steps.length) {
+            const summary = data.steps.map(step =>
+                `${step.isError ? '⚠' : '✓'} ${step.thought || ''}` +
+                (step.output ? `\n${step.output}` : '')
+            ).join('\n\n');
+
+            addMessage(
+                'assistant',
+                `${data.message || 'Finished.'}` +
+                (summary ? `\n\nProgress summary\n${summary}` : '')
+            );
+        } else {
+            addMessage(
+                'assistant',
+                data.message || 'Finished.'
+            );
+        }
+    }
+
+    async function readSse(response, onEvent) {
+        if (!response.body) {
+            throw new Error('The server did not provide a streaming response.');
+        }
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+
+        let buffer = '';
+
+        function processBlock(block) {
+            if (!block.trim()) return;
+
+            let event = 'message';
+            const dataLines = [];
+
+            for (const line of block.split(/\r?\n/)) {
+                if (line.startsWith('event:')) {
+                    event = line.slice(6).trim();
+                } else if (line.startsWith('data:')) {
+                    dataLines.push(line.slice(5).trimStart());
+                }
+            }
+
+            if (!dataLines.length) return;
+
+            let data;
+
+            try {
+                data = JSON.parse(dataLines.join('\n'));
+            } catch {
+                throw new Error('The server returned invalid streaming data.');
+            }
+
+            // Do not swallow event-handler errors.
+            onEvent(event, data);
+        }
+
+        while (true) {
+            const { value, done } = await reader.read();
+
+            if (done) break;
+
+            buffer += decoder.decode(value, { stream: true });
+
+            let boundary;
+
+            while ((boundary = buffer.search(/\r?\n\r?\n/)) >= 0) {
+                const block = buffer.slice(0, boundary);
+                const separator = buffer.match(/\r?\n\r?\n/);
+
+                buffer = buffer.slice(
+                    boundary + (separator ? separator[0].length : 2)
+                );
+
+                processBlock(block);
+            }
+        }
+
+        buffer += decoder.decode();
+
+        if (buffer.trim()) {
+            processBlock(buffer);
+        }
+    }
+
+    function getConversationContext() {
+        return Array.from(
+            document.querySelectorAll('#conversation .message')
+        )
+        .slice(-8)
+        .map(message => ({
+            role: message.classList.contains('user')
+                ? 'user'
+                : 'assistant',
+            content: (
+                message.querySelector('.message-body')?.textContent || ''
+            ).slice(0, 1500)
+        }));
+    }
+
+    function getCurrentFiles() {
+        return state.files.map(file => ({
+            name: file.name || file.path,
+            path: file.path || file.name,
+            content: file.content || ''
+        }));
+    }
+
+    async function runPrompt(promptText) {
+        if (state.busy) {
+            toast('Mora AI is still working on your previous request.');
+            return;
+        }
+
+        const prompt = String(promptText || '').trim();
+
+        if (!prompt) return;
+
+        state.busy = true;
+        state.prompt = prompt;
+
+        // Preserve project ID and existing files for follow-up requests.
+        $('#exportBtn').disabled = !state.projectId;
+        $('#saveBtn').disabled = !state.files.length;
+
+        addMessage('user', prompt);
+
+        $('#prompt').value = '';
+        $('#sendBtn').disabled = true;
+
+        showProgress(
+            state.files.length
+                ? 'Reviewing your current project…'
+                : 'Connecting to Mora AI…'
+        );
+
+        let liveBubble = null;
+        let gotResult = false;
+
+        try {
+            const payload = {
+                prompt,
+                mode: $('#mode').value,
+                projectId: state.projectId,
+                projectTitle: state.projectTitle,
+                currentFiles: getCurrentFiles(),
+                conversation: getConversationContext()
+            };
+
+            const response = await fetch('/api/agent/stream', {
+                method: 'POST',
+                headers: apiHeaders(true),
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                let errorData = {};
+
+                try {
+                    errorData = await response.json();
+                } catch {}
+
+                throw new Error(
+                    errorData.error ||
+                    `Request failed (${response.status})`
+                );
+            }
+
+            await readSse(response, (event, data) => {
+                if (event === 'progress') {
+                    showProgress(
+                        data.message ||
+                        data.stage ||
+                        'Mora AI is working…'
+                    );
+                }
+
+                if (event === 'delta') {
+                    if (!liveBubble) {
+                        liveBubble = addMessage('assistant', '');
+                    }
+
+                    const body =
+                        liveBubble.querySelector('.message-body');
+
+                    // Support either delta chunks or accumulated text.
+                    if (typeof data.accumulated === 'string') {
+                        body.textContent = data.accumulated;
+                    } else if (typeof data.text === 'string') {
+                        body.textContent += data.text;
+                    } else if (typeof data.raw === 'string') {
+                        body.textContent = data.raw;
+                    }
+
+                    liveBubble.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'nearest'
+                    });
+                }
+
+                if (event === 'result') {
+                    gotResult = true;
+
+                    if (liveBubble) {
+                        liveBubble.remove();
+                        liveBubble = null;
+                    }
+
+                    if (data.projectId) {
+                        state.projectId = data.projectId;
+                    }
+
+                    if (data.projectTitle) {
+                        state.projectTitle = data.projectTitle;
+                    }
+
+                    renderResult(data);
+                }
+
+                if (event === 'error') {
+                    throw new Error(
+                        data.error ||
+                        data.message ||
+                        'Agent request failed.'
+                    );
+                }
+            });
+
+            if (!gotResult) {
+                throw new Error(
+                    'The connection ended before Mora AI returned a result. ' +
+                    'Your current project has been preserved.'
+                );
+            }
+
+            toast('Mora AI finished. Review your updated project.');
+
+        } catch (error) {
+            if (liveBubble) {
+                liveBubble.remove();
+            }
+
+            console.error('Mora AI request failed:', error);
+
+            addMessage(
+                'assistant',
+                `I couldn't complete that request.\n\n${error.message}`
+            );
+
+            toast(error.message);
+
+        } finally {
+            state.busy = false;
+            hideProgress();
+            $('#sendBtn').disabled = false;
+        }
+    }
+
+    async function testPreview() {
+        const html = getPreviewHtml();
+
+        if (!html) {
+            return toast('Generate or open an HTML file first.');
+        }
+
+        $('#terminalOutput').textContent = 'Running browser smoke test…';
+
+        setPane('terminal');
+        $('#workspace').classList.add('visible');
+
+        try {
+            const result = await api('/api/test/html', {
+                method: 'POST',
+                body: JSON.stringify({ html })
+            });
+
+            const details = result.details || {};
+
+            $('#terminalOutput').textContent =
+                `${result.passed ? 'PASS' : 'CHECK REQUIRED'} — ${result.browser}\n\n` +
+                `Title: ${details.title || 'n/a'}\n` +
+                `Elements: ${details.elementCount ?? 'n/a'}\n` +
+                `Text length: ${details.bodyTextLength ?? 'n/a'}\n` +
+                `Viewport meta: ${details.hasViewport ? 'present' : 'missing'}\n` +
+                `Horizontal overflow: ${details.horizontalOverflow ? 'detected' : 'not detected'}\n\n` +
+                `Console errors:\n${(result.consoleErrors || []).join('\n') || 'None'}\n\n` +
+                `Page errors:\n${(result.pageErrors || []).join('\n') || 'None'}\n\n` +
+                `${result.note || ''}`;
+
+            toast(
+                result.passed
+                    ? 'Browser smoke test passed'
+                    : 'Browser test found issues'
+            );
+
+        } catch (error) {
+            $('#terminalOutput').textContent =
+                `Browser test unavailable or failed:\n${error.message}\n\n` +
+                'You can still inspect the Canvas preview manually.';
+
+            toast(error.message);
+        }
+    }
+
+    async function refreshProjects() {
+        try {
+            const data = await api('/api/projects');
+            const projects = data.projects || [];
+
+            $('#projectCount').textContent = projects.length;
+
+            const host = $('#sidebarProjects');
+            host.replaceChildren();
+
+            if (!projects.length) {
+                host.innerHTML =
+                    '<div class="empty">No projects saved yet.</div>';
+            }
+
+            projects.slice(0, 8).forEach(project => {
+                const button = document.createElement('button');
+
+                button.className = 'side-item';
+                button.textContent = project.title;
+                button.title = project.title;
+
+                button.addEventListener('click', () => {
+                    loadProject(project.id);
+                });
+
+                host.append(button);
+            });
+
+        } catch {
+            $('#healthText').textContent = 'API needs attention';
+        }
+    }
+
+    async function showProjects() {
+        $('#modalTitle').textContent = 'Saved projects';
+        $('#modalContent').innerHTML =
+            '<div class="empty">Loading projects…</div>';
+
+        $('#modalBackdrop').classList.add('open');
+
+        try {
+            const { projects = [] } = await api('/api/projects');
+            const host = $('#modalContent');
+
+            host.replaceChildren();
+
+            if (!projects.length) {
+                host.innerHTML =
+                    '<div class="empty">Nothing saved yet. Generate files and select Save project.</div>';
+            }
+
+            for (const project of projects) {
+                const row = document.createElement('div');
+                row.className = 'project-row';
+
+                const meta = document.createElement('div');
+                meta.className = 'project-meta';
+
+                const title = document.createElement('strong');
+                title.textContent = project.title;
+
+                const small = document.createElement('small');
+
+                small.textContent =
+                    `${new Date(project.updatedAt).toLocaleString()} · ` +
+                    `${(project.files || []).length} file(s)`;
+
+                meta.append(title, small);
+
+                const open = document.createElement('button');
+                open.className = 'small-btn';
+                open.textContent = 'Open';
+
+                open.onclick = () => {
+                    $('#modalBackdrop').classList.remove('open');
+                    loadProject(project.id);
+                };
+
+                const exportButton = document.createElement('button');
+                exportButton.className = 'small-btn';
+                exportButton.textContent = 'ZIP';
+                exportButton.onclick = () => exportProject(project.id);
+
+                const remove = document.createElement('button');
+                remove.className = 'small-btn danger';
+                remove.textContent = 'Delete';
+
+                remove.onclick = async () => {
+                    if (!confirm(`Delete "${project.title}"?`)) return;
+
+                    try {
+                        await api(`/api/projects/${encodeURIComponent(project.id)}`, {
+                            method: 'DELETE'
+                        });
+
+                        if (state.projectId === project.id) {
+                            resetWorkspace();
+                        }
+
+                        toast('Project deleted');
+                        showProjects();
+                        refreshProjects();
+
+                    } catch (error) {
+                        toast(error.message);
+                    }
+                };
+
+                row.append(meta, open, exportButton, remove);
+                host.append(row);
+            }
+
+        } catch (error) {
+            $('#modalContent').textContent = error.message;
+        }
+    }
+
+    async function saveProject() {
+        if (!state.files.length) {
+            return toast('Generate at least one file before saving.');
+        }
+
+        const title = prompt(
+            'Name this project:',
+            state.projectTitle ||
+            state.files[0].name?.replace(/\.[^.]+$/, '') ||
+            'Mora AI Project'
+        );
+
+        if (!title) return;
+
+        try {
+            const data = await api('/api/projects', {
+                method: 'POST',
+                body: JSON.stringify({
+                    id: state.projectId || undefined,
+                    title,
+                    prompt: state.prompt,
+                    files: state.files
+                })
+            });
+
+            state.projectId = data.project.id;
+            state.projectTitle = data.project.title;
+
+            $('#exportBtn').disabled = false;
+            $('#saveBtn').disabled = false;
+
+            toast('Project saved');
+            refreshProjects();
+
+        } catch (error) {
+            toast(error.message);
+        }
+    }
+
+    async function loadProject(id) {
+        try {
+            const { project } = await api(
+                `/api/projects/${encodeURIComponent(id)}`
+            );
+
+            // Prevent mixing the previous project's chat with this project.
+            $('#conversation').replaceChildren();
+
+            state.projectId = project.id;
+            state.projectTitle = project.title;
+            state.prompt = project.prompt || '';
+            state.files = project.files || [];
+            state.canvas = null;
+            state.terminal = '';
+
+            const htmlFile = state.files.find(file =>
+                /\.html?$/i.test(file.path || file.name || '')
+            );
+
+            if (htmlFile) {
+                state.canvas = {
+                    type: 'html',
+                    title: htmlFile.name || htmlFile.path,
+                    html: htmlFile.content || ''
+                };
+            }
+
+            renderFiles();
+
+            $('#terminalOutput').textContent =
+                'Project loaded. No execution was run.';
+
+            const previewLoaded = updatePreview();
+
+            $('#workspace').classList.add('visible');
+            $('#exportBtn').disabled = false;
+            $('#saveBtn').disabled = !state.files.length;
+
+            setPane(previewLoaded ? 'preview' : 'files');
+
+            addMessage(
+                'assistant',
+                `Opened project: ${project.title}\n` +
+                `${state.files.length} file(s) loaded. ` +
+                'Continue by describing the changes you want.'
+            );
+
+            toast('Project opened');
+
+        } catch (error) {
+            toast(error.message);
+        }
+    }
+
+    function resetWorkspace() {
+        state.files = [];
+        state.canvas = null;
+        state.terminal = '';
+        state.prompt = '';
+        state.projectId = null;
+        state.projectTitle = '';
+        state.history = [];
+
+        $('#conversation').replaceChildren();
+        $('#prompt').value = '';
+        $('#workspace').classList.remove('visible');
+        $('#heroCard').style.minHeight = '';
+
+        $('#saveBtn').disabled = true;
+        $('#exportBtn').disabled = true;
+
+        $('#previewFrame').srcdoc = '';
+        $('#previewFrame').classList.add('hidden');
+        $('#previewEmpty').classList.remove('hidden');
+
+        $('#terminalOutput').textContent = 'No execution output yet.';
+
+        renderFiles();
+        setPane('preview');
+    }
+
+    async function exportProject(id = state.projectId) {
+        if (!id) {
+            return toast('Save the project first to export a ZIP.');
+        }
+
+        try {
+            const response = await fetch(
+                `/api/projects/${encodeURIComponent(id)}/export.zip`,
+                { headers: apiHeaders() }
+            );
+
+            if (!response.ok) {
+                let data = {};
+
+                try {
+                    data = await response.json();
+                } catch {}
+
+                throw new Error(
+                    data.error || 'ZIP export failed'
+                );
+            }
+
+            const blob = await response.blob();
+            const url = URL.createObjectURL(blob);
+
+            const link = document.createElement('a');
+
+            link.href = url;
+            link.download =
+                `${(state.projectTitle || 'mora-project')
+                    .replace(/[^a-z0-9_-]/gi, '_')}.zip`;
+
+            link.click();
+
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+        } catch (error) {
+            toast(error.message);
+        }
+    }
+
+    async function showHistory() {
+        $('#modalTitle').textContent = 'Recent activity';
+
+        $('#modalContent').innerHTML =
+            '<div class="empty">Loading history…</div>';
+
+        $('#modalBackdrop').classList.add('open');
+
+        try {
+            const { history = [] } = await api('/api/history');
+            const host = $('#modalContent');
+
+            host.replaceChildren();
+
+            if (!history.length) {
+                host.innerHTML =
+                    '<div class="empty">No requests yet.</div>';
+            }
+
+            history.forEach(item => {
+                const row = document.createElement('div');
+                row.className = 'project-row';
+
+                const meta = document.createElement('div');
+                meta.className = 'project-meta';
+
+                const title = document.createElement('strong');
+                title.textContent = item.prompt;
+
+                const small = document.createElement('small');
+                small.textContent =
+                    `${new Date(item.createdAt).toLocaleString()} · ` +
+                    `${item.files?.length || 0} file(s)`;
+
+                meta.append(title, small);
+
+                const reuse = document.createElement('button');
+                reuse.className = 'small-btn';
+                reuse.textContent = 'Reuse';
+
+                reuse.onclick = () => {
+                    $('#prompt').value = item.prompt;
+                    $('#modalBackdrop').classList.remove('open');
+                    $('#prompt').focus();
+                };
+
+                row.append(meta, reuse);
+                host.append(row);
+            });
+
+        } catch (error) {
+            $('#modalContent').textContent = error.message;
+        }
+    }
+
+    async function checkHealth() {
+        try {
+            const health = await api('/api/health');
+
+            $('#healthText').textContent =
+                health.geminiConfigured
+                    ? `Online · ${health.model}`
+                    : 'Gemini key missing';
+
+            $('#healthText').previousElementSibling
+                ?.classList.toggle(
+                    'status-dot',
+                    Boolean(health.geminiConfigured)
+                );
+
+        } catch {
+            $('#healthText').textContent = 'Backend offline';
+        }
+    }
+
+    // Event listeners
+
+    $('#promptForm').addEventListener('submit', event => {
+        event.preventDefault();
+        runPrompt($('#prompt').value);
+    });
+
+    document.querySelectorAll('.suggestion').forEach(button => {
+        button.addEventListener('click', () => {
+            $('#prompt').value = button.dataset.prompt;
+            $('#prompt').focus();
+        });
+    });
+
+    $('#newBtn').onclick = () => {
+        if (state.busy) {
+            return toast('Wait for the current request to finish.');
+        }
+
+        resetWorkspace();
+        toast('Started a new workspace');
+    };
+
+    $('#projectsBtn').onclick = showProjects;
+    $('#historyBtn').onclick = showHistory;
+
+    $('#refreshProjectsBtn').onclick = () => {
+        refreshProjects();
+        checkHealth();
+    };
+
+    $('#testPreviewBtn').onclick = testPreview;
+    $('#saveBtn').onclick = saveProject;
+    $('#exportBtn').onclick = () => exportProject();
+
+    $('#closeWorkspaceBtn').onclick = () => {
+        $('#workspace').classList.remove('visible');
+    };
+
+    document.querySelectorAll('[data-pane]').forEach(button => {
+        button.addEventListener('click', () => {
+            setPane(button.dataset.pane);
+        });
+    });
+
+    $('#modalClose').onclick = () => {
+        $('#modalBackdrop').classList.remove('open');
+    };
+
+    $('#modalBackdrop').addEventListener('click', event => {
+        if (event.target === $('#modalBackdrop')) {
+            $('#modalBackdrop').classList.remove('open');
+        }
+    });
+
+    $('#settingsBtn').onclick = () => {
+        const current = apiToken();
+
+        const value = prompt(
+            'Optional Mora API token. Leave blank for local development without a token. Never share this token or place it in a public website.',
+            current
+        );
+
+        if (value === null) return;
+
+        if (value.trim()) {
+            localStorage.setItem(tokenKey, value.trim());
+        } else {
+            localStorage.removeItem(tokenKey);
+        }
+
+        toast('Token setting updated for this browser');
+        checkHealth();
+        refreshProjects();
+    };
+
+    $('#prompt').addEventListener('keydown', event => {
+        if (
+            event.key === 'Enter' &&
+            !event.shiftKey &&
+            !event.isComposing
+        ) {
+            event.preventDefault();
+            $('#promptForm').requestSubmit();
+        }
+    });
+
+    // Initial setup
+    $('#saveBtn').disabled = true;
+    $('#exportBtn').disabled = true;
+
+    checkHealth();
+    refreshProjects();
+})();
+</script>
+</body>
+</html>
