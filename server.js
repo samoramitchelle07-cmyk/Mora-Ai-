@@ -103,8 +103,7 @@ app.use(
 );
 
 // ============================================================
-// AUTHENTICATION
-// ============================================================
+// AUTHENTIlegacyHeaders=========================================================
 
 function safeEqual(a, b) {
     const aa = Buffer.from(String(a));
@@ -2018,24 +2017,17 @@ app.delete('/api/projects/:id', async (req, res) => {
 // ============================================================
 
 app.use((error, _req, res, _next) => {
-    console.error(
-        'Unhandled server error:',
-        error
-    );
+    console.error('Unhandled server error:', error);
 
     if (res.headersSent) {
         return;
     }
 
-    res.status(
-        error.status || 500
-    ).json({
+    res.status(error.status || 500).json({
         success: false,
-
-        error:
-            error.status === 413
-                ? 'Request too large.'
-                : 'Unexpected server error. Check server logs.'
+        error: error.status === 413
+            ? 'Request too large.'
+            : 'Unexpected server error. Check server logs.'
     });
 });
 
@@ -2047,214 +2039,12 @@ await fs.mkdir(DATA_DIR, {
     recursive: true
 });
 
-app.listen(
-    PORT,
-    '0.0.0.0',
-    () => {
-        console.log(`
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`
 Mora AI v2 listening on http://localhost:${PORT}
 Gemini: ${ai ? `configured (${MODEL})` : 'MISSING API KEY'}
 E2B: ${process.env.E2B_API_KEY ? 'configured' : 'not configured (Python execution disabled)'}
 Auth: ${TOKEN ? 'API token required' : 'disabled for local development only'}
 Storage: ${DATA_DIR}
-        `);
-    }
-););
-    const result = await sandbox.runCode(code, { timeoutMs: 20000 });
-    const stdout = Array.isArray(result.logs?.stdout) ? result.logs.stdout.join('\n') : '';
-    const stderr = Array.isArray(result.logs?.stderr) ? result.logs.stderr.join('\n') : '';
-    const errorText = result.error ? (result.error.traceback || result.error.name || String(result.error)) : '';
-    const output = [result.text, stdout, stderr, errorText].filter(Boolean).join('\n').slice(0, 10000) || 'Execution completed with no printed output.';
-    return { ok: !result.error, output };
-  } catch (e) { return { ok: false, output: `E2B execution failed: ${String(e.message || e).slice(0, 1200)}` }; }
-  finally { if (sandbox?.kill) { try { await sandbox.kill(); } catch {} } }
-}
-async function saveHistory(prompt, result) {
-  try {
-    const history = await readJson(HISTORY_FILE, []);
-    history.unshift({ id: crypto.randomUUID(), createdAt: new Date().toISOString(), prompt, message: result.message.slice(0, 4000), files: result.files.map(f => f.name), status: result.status });
-    await writeJson(HISTORY_FILE, history.slice(0, 100));
-  } catch (e) { console.error('History save warning:', e.message); }
-}
-async function runAgent(prompt, notify = () => {}) {
-  let result = await askGemini(prompt, '', () => {});
-  notify({ stage: 'generated', message: 'Initial response generated.' });
-  if (result.execution.requested) {
-    if (result.execution.language !== 'python') {
-      result.terminal = 'Execution skipped: Mora AI currently permits Python only.';
-    } else {
-      notify({ stage: 'testing', message: 'Running Python in isolated E2B sandbox…' });
-      let run = await executePython(result.execution.code);
-      result.terminal = run.output;
-      result.steps.push({ thought: run.ok ? 'Python test completed.' : 'Python test did not pass.', command: 'test-python', output: run.output.slice(0, 2500), isError: !run.ok });
-      if (!run.ok && !run.blocked && !/not configured/i.test(run.output)) {
-        notify({ stage: 'repairing', message: 'Analyzing the error and generating one repair attempt…' });
-        try {
-          const repair = await askGemini(prompt, `Python execution failed. Error/output:\n${run.output}\nCode that failed:\n${result.execution.code}\nReturn a corrected solution. If appropriate, include corrected Python in execution.code. Do not repeat unsafe behavior.`);
-          if (repair.files.length) result.files = repair.files;
-          if (repair.canvas) result.canvas = repair.canvas;
-          result.message += `\n\nRepair attempt: ${repair.message}`;
-          if (repair.execution.requested && repair.execution.language === 'python') {
-            const second = await executePython(repair.execution.code);
-            result.terminal += `\n\n--- Repair attempt ---\n${second.output}`;
-            result.steps.push({ thought: second.ok ? 'Repair attempt passed.' : 'Repair attempt did not pass.', command: 'repair-test', output: second.output.slice(0, 2500), isError: !second.ok });
-          }
-        } catch (e) {
-          result.steps.push({ thought: 'Automatic repair was unavailable.', command: 'auto-repair', output: String(e.message || e).slice(0, 1000), isError: true });
-        }
-      }
-    }
-  }
-  result.status = 'completed';
-  await saveHistory(prompt, result);
-  return result;
-}
-
-app.get('/api/health', (_req, res) => res.json({ success: true, status: 'online', service: 'Mora AI', model: MODEL, geminiConfigured: Boolean(process.env.GEMINI_API_KEY), e2bConfigured: Boolean(process.env.E2B_API_KEY), authRequired: Boolean(TOKEN), projectStorage: 'local-json-single-user', browserTesting: 'optional-playwright', timestamp: new Date().toISOString() }));
-
-function validatePrompt(req, res) {
-  const prompt = typeof req.body?.prompt === 'string' ? req.body.prompt.trim() : '';
-  if (!prompt) { res.status(400).json({ success: false, error: 'Enter a prompt first.' }); return null; }
-  if (prompt.length > MAX_PROMPT) { res.status(413).json({ success: false, error: `Prompt exceeds ${MAX_PROMPT} characters.` }); return null; }
-  if (!ai) { res.status(503).json({ success: false, error: 'GEMINI_API_KEY is missing from .env.' }); return null; }
-  return prompt;
-}
-function sendSse(res, event, data) { res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`); }
-app.post('/api/agent/stream', async (req, res) => {
-  const prompt = validatePrompt(req, res); if (!prompt) return;
-  res.status(200).set({ 'Content-Type': 'text/event-stream; charset=utf-8', 'Cache-Control': 'no-cache, no-transform', Connection: 'keep-alive', 'X-Accel-Buffering': 'no' });
-  res.flushHeaders?.();
-  let closed = false; res.on('close', () => { if (!res.writableEnded) closed = true; });
-  try {
-    sendSse(res, 'progress', { stage: 'planning', message: 'Mora AI is analyzing your request…' });
-    // Gemini output is streamed internally. Structured JSON is emitted to the UI after validation.
-    let lastPartial = '';
-    let result = await askGemini(prompt, '', info => { if (closed) return; sendSse(res, 'progress', { stage: 'generating', message: 'Generating response…' }); if (info.partialMessage && info.partialMessage !== lastPartial) { lastPartial = info.partialMessage; sendSse(res, 'delta', { text: lastPartial }); } });
-    if (!closed) sendSse(res, 'progress', { stage: 'generated', message: 'Response generated. Preparing tests and files…' });
-    if (result.execution.requested) {
-      if (result.execution.language !== 'python') result.terminal = 'Execution skipped: only Python is enabled.';
-      else {
-        if (!closed) sendSse(res, 'progress', { stage: 'testing', message: 'Running Python in isolated E2B sandbox…' });
-        let run = await executePython(result.execution.code);
-        result.terminal = run.output;
-        result.steps.push({ thought: run.ok ? 'Python test completed.' : 'Python test did not pass.', command: 'test-python', output: run.output.slice(0, 2500), isError: !run.ok });
-        if (!run.ok && !run.blocked && !/not configured/i.test(run.output)) {
-          if (!closed) sendSse(res, 'progress', { stage: 'repairing', message: 'Analyzing error and trying one automatic repair…' });
-          try {
-            const repair = await askGemini(prompt, `Python execution failed. Error/output:\n${run.output}\nOriginal code:\n${result.execution.code}\nProvide a corrected solution. If appropriate, include corrected Python in execution.code.`);
-            if (repair.files.length) result.files = repair.files;
-            if (repair.canvas) result.canvas = repair.canvas;
-            result.message += `\n\nRepair attempt: ${repair.message}`;
-            if (repair.execution.requested && repair.execution.language === 'python') {
-              const second = await executePython(repair.execution.code);
-              result.terminal += `\n\n--- Repair attempt ---\n${second.output}`;
-              result.steps.push({ thought: second.ok ? 'Repair test passed.' : 'Repair test did not pass.', command: 'repair-test', output: second.output.slice(0, 2500), isError: !second.ok });
-            }
-          } catch (e) { result.steps.push({ thought: 'Automatic repair failed.', command: 'auto-repair', output: String(e.message || e).slice(0, 1000), isError: true }); }
-        }
-      }
-    }
-    result.status = 'completed'; await saveHistory(prompt, result);
-    if (!closed) { sendSse(res, 'result', result); sendSse(res, 'done', { ok: true }); res.end(); }
-  } catch (e) {
-    console.error('Agent stream error:', e);
-    if (!closed) { sendSse(res, 'error', { error: friendlyError(e) }); res.end(); }
-  }
+    `);
 });
-app.post('/api/agent', async (req, res) => {
-  const prompt = validatePrompt(req, res); if (!prompt) return;
-  try { res.json(await runAgent(prompt)); }
-  catch (e) { console.error('Agent error:', e); res.status(errorStatus(e)).json({ success: false, error: friendlyError(e) }); }
-});
-function friendlyError(e) {
-  const msg = String(e?.message || e || 'Unknown error');
-  if (/API key|unauthorized|permission/i.test(msg)) return `Gemini authentication failed. Check GEMINI_API_KEY and model access. Details: ${msg.slice(0, 500)}`;
-  if (/quota|rate limit|resource_exhausted/i.test(msg)) return `Gemini quota or rate limit reached. Wait and retry. Details: ${msg.slice(0, 500)}`;
-  return `Mora AI request failed: ${msg.slice(0, 900)}`;
-}
-function errorStatus(e) { return /quota|rate limit|resource_exhausted/i.test(String(e?.message || e)) ? 429 : 502; }
-
-app.post('/api/test/html', async (req, res) => {
-  const html = typeof req.body?.html === 'string' ? req.body.html : '';
-  if (!html.trim()) return res.status(400).json({ success: false, error: 'No HTML supplied to test.' });
-  if (html.length > 180000) return res.status(413).json({ success: false, error: 'HTML exceeds the 180,000 character testing limit.' });
-  let chromium;
-  try {
-    ({ chromium } = await import('playwright'));
-  } catch {
-    return res.status(503).json({ success: false, error: 'Browser testing is not installed. On supported Linux/Windows/macOS, run: npm install and npx playwright install chromium. Some Android Termux environments cannot run Playwright browsers; use a supported host for this feature.' });
-  }
-  let browser;
-  try {
-    browser = await chromium.launch({ headless: true, args: ['--no-sandbox'] });
-    const context = await browser.newContext({ viewport: { width: 1280, height: 800 }, javaScriptEnabled: true, serviceWorkers: 'block' });
-    await context.route('**/*', route => {
-      const url = route.request().url();
-      if (url === 'about:blank' || url.startsWith('data:') || url.startsWith('blob:')) return route.continue();
-      return route.abort('blockedbyclient');
-    });
-    const page = await context.newPage();
-    const consoleErrors = []; const pageErrors = [];
-    page.on('console', msg => { if (msg.type() === 'error') consoleErrors.push(msg.text().slice(0, 500)); });
-    page.on('pageerror', err => pageErrors.push(String(err.message || err).slice(0, 500)));
-    await page.setContent(html, { waitUntil: 'domcontentloaded', timeout: 10000 });
-    await page.waitForTimeout(500);
-    const details = await page.evaluate(() => ({
-      title: document.title || '(no title)',
-      bodyTextLength: (document.body?.innerText || '').trim().length,
-      elementCount: document.querySelectorAll('*').length,
-      hasViewport: Boolean(document.querySelector('meta[name="viewport"]')),
-      horizontalOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth
-    }));
-    const passed = pageErrors.length === 0 && consoleErrors.length === 0;
-    res.json({ success: true, passed, browser: 'Chromium (Playwright)', details, consoleErrors: consoleErrors.slice(0, 20), pageErrors: pageErrors.slice(0, 20), note: 'External network requests were blocked during this test. This is a smoke test, not a complete security audit.' });
-    await context.close();
-  } catch (e) {
-    if (!res.headersSent) res.status(500).json({ success: false, error: `Browser test failed: ${String(e.message || e).slice(0, 700)}` });
-  } finally { if (browser) { try { await browser.close(); } catch {} } }
-});
-
-app.get('/api/history', async (_req, res) => { try { res.json({ success: true, history: await readJson(HISTORY_FILE, []) }); } catch (e) { res.status(500).json({ success: false, error: e.message }); } });
-app.get('/api/projects', async (_req, res) => {
-  try { const projects = await readJson(PROJECTS_FILE, []); res.json({ success: true, projects: projects.map(({ id, title, updatedAt, createdAt, prompt, files }) => ({ id, title, updatedAt, createdAt, prompt, files: (files || []).map(f => ({ name: f.name, path: f.path, language: f.language })) })) }); }
-  catch (e) { res.status(500).json({ success: false, error: 'Could not read project storage.' }); }
-});
-app.post('/api/projects', async (req, res) => {
-  const title = String(req.body?.title || 'Untitled Mora AI Project').trim().slice(0, 120);
-  const prompt = String(req.body?.prompt || '').slice(0, MAX_PROMPT);
-  const files = normalizeFiles(req.body?.files);
-  if (!files.length) return res.status(400).json({ success: false, error: 'Add at least one generated file before saving.' });
-  if (files.reduce((n, f) => n + f.content.length, 0) > 500000) return res.status(413).json({ success: false, error: 'Project is too large to save (maximum 500 KB of file content).' });
-  try {
-    const projects = await readJson(PROJECTS_FILE, []);
-    const id = req.body?.id && /^[a-f0-9-]{20,40}$/i.test(req.body.id) ? req.body.id : crypto.randomUUID();
-    const now = new Date().toISOString(); const existing = projects.find(p => p.id === id);
-    const project = { id, title, prompt, files, createdAt: existing?.createdAt || now, updatedAt: now };
-    await writeJson(PROJECTS_FILE, [project, ...projects.filter(p => p.id !== id)].slice(0, 100));
-    res.json({ success: true, project });
-  } catch (e) { res.status(500).json({ success: false, error: 'Could not save project.' }); }
-});
-app.get('/api/projects/:id', async (req, res) => {
-  try { const p = (await readJson(PROJECTS_FILE, [])).find(x => x.id === req.params.id); if (!p) return res.status(404).json({ success: false, error: 'Project not found.' }); res.json({ success: true, project: p }); }
-  catch (e) { res.status(500).json({ success: false, error: 'Could not load project.' }); }
-});
-app.get('/api/projects/:id/export.zip', async (req, res) => {
-  try {
-    const p = (await readJson(PROJECTS_FILE, [])).find(x => x.id === req.params.id);
-    if (!p) return res.status(404).json({ success: false, error: 'Project not found.' });
-    const zipName = `${safeFilename(p.title || 'mora-project').replace(/\.[^.]+$/, '')}.zip`;
-    res.setHeader('Content-Type', 'application/zip'); res.setHeader('Content-Disposition', `attachment; filename="${zipName}"`);
-    const zip = archiver('zip', { zlib: { level: 6 } });
-    zip.on('error', e => { console.error('ZIP error:', e); if (!res.headersSent) res.status(500).end('ZIP export failed.'); else res.end(); });
-    zip.pipe(res); for (const [i, f] of normalizeFiles(p.files).entries()) zip.append(f.content, { name: safeFilename(f.path || f.name, i) });
-    zip.append(JSON.stringify({ id: p.id, title: p.title, prompt: p.prompt, createdAt: p.createdAt, updatedAt: p.updatedAt }, null, 2), { name: 'mora-project.json' });
-    await zip.finalize();
-  } catch (e) { if (!res.headersSent) res.status(500).json({ success: false, error: 'Could not export project.' }); }
-});
-app.delete('/api/projects/:id', async (req, res) => {
-  try { const old = await readJson(PROJECTS_FILE, []); const next = old.filter(p => p.id !== req.params.id); if (old.length === next.length) return res.status(404).json({ success: false, error: 'Project not found.' }); await writeJson(PROJECTS_FILE, next); res.json({ success: true, deleted: true }); }
-  catch (e) { res.status(500).json({ success: false, error: 'Could not delete project.' }); }
-});
-app.use((err, _req, res, _next) => { console.error('Unhandled error:', err); if (res.headersSent) return; res.status(err.status || 500).json({ success: false, error: err.status === 413 ? 'Request too large.' : 'Unexpected server error. Check server logs.' }); });
-await fs.mkdir(DATA_DIR, { recursive: true });
-app.listen(PORT, '0.0.0.0', () => console.log(`\nMora AI v2 listening on http://localhost:${PORT}\nGemini: ${ai ? `configured (${MODEL})` : 'MISSING API KEY'}\nE2B: ${process.env.E2B_API_KEY ? 'configured' : 'not configured (Python execution disabled)'}\nAuth: ${TOKEN ? 'API token required' : 'disabled for local development only'}\nStorage: ${DATA_DIR}\n`));
