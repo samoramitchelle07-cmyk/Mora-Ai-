@@ -258,6 +258,232 @@ function normalizeFiles(files) {
 // ============================================================
 
 function parseJson(text) {
+    if (typeof text !== 'string' || !text.trim()) {
+        throw new Error('Gemini returned an empty JSON response.');
+    }
+
+    let cleaned = text.trim();
+
+    // Remove Markdown fences if Gemini includes them.
+    cleaned = cleaned
+        .replace(/^```(?:json)?\s*/i, '')
+        .replace(/\s*```$/, '')
+        .trim();
+
+    // First try parsing the complete response.
+    try {
+        const parsed = JSON.parse(cleaned);
+
+        if (
+            parsed === null ||
+            typeof parsed !== 'object' ||
+            Array.isArray(parsed)
+        ) {
+            throw new Error('Expected a JSON object.');
+        }
+
+        return parsed;
+    } catch (initialError) {
+        // Continue to attempt extracting a JSON object.
+    }
+
+    // Find the first opening brace.
+    const start = cleaned.indexOf('{');
+
+    if (start === -1) {
+        throw new Error(
+            'Gemini response could not be parsed: no JSON object found.'
+        );
+    }
+
+    // Find the matching closing brace while respecting strings.
+    let depth = 0;
+    let inString = false;
+    let escaped = false;
+    let end = -1;
+
+    for (let i = start; i < cleaned.length; i++) {
+        const char = cleaned[i];
+
+        if (inString) {
+            if (escaped) {
+                escaped = false;
+                continue;
+            }
+
+            if (char === '\\') {
+                escaped = true;
+                continue;
+            }
+
+            if (char === '"') {
+                inString = false;
+            }
+
+            continue;
+        }
+
+        if (char === '"') {
+            inString = true;
+            continue;
+        }
+
+        if (char === '{') {
+            depth++;
+        } else if (char === '}') {
+            depth--;
+
+            if (depth === 0) {
+                end = i;
+                break;
+            }
+        }
+    }
+
+    if (end === -1) {
+        throw new Error(
+            'Incomplete JSON segment: Gemini did not finish the JSON object.'
+        );
+    }
+
+    const candidate = cleaned.slice(start, end + 1);
+
+    try {
+        const parsed = JSON.parse(candidate);
+
+        if (
+            parsed === null ||
+            typeof parsed !== 'object' ||
+            Array.isArray(parsed)
+        ) {
+            throw new Error('Expected a JSON object.');
+        }
+
+        return parsed;
+    } catch (error) {
+        throw new Error(
+            `Gemini JSON is invalid: ${String(error.message).slice(0, 300)}`
+        );
+    }
+}
+
+// ============================================================
+// NORMALIZE GEMINI RESULTS
+// ============================================================
+
+function normalizeResult(data, prompt = '') {
+    if (
+        !data ||
+        typeof data !== 'object' ||
+        Array.isArray(data)
+    ) {
+        throw new Error('Gemini returned an invalid result object.');
+    }
+
+    const message =
+        typeof data.message === 'string'
+            ? data.message.slice(0, 30000)
+            : '';
+
+    const rawSteps = Array.isArray(data.steps)
+        ? data.steps.slice(0, 50)
+        : [];
+
+    const steps = rawSteps.map(step => ({
+        thought: String(
+            step?.thought || ''
+        ).slice(0, 1000),
+
+        command: String(
+            step?.command || 'generate'
+        ).slice(0, 100),
+
+        output: String(
+            step?.output || ''
+        ).slice(0, 3000),
+
+        isError: Boolean(step?.isError)
+    }));
+
+    const files = normalizeFiles(data.files);
+
+    // Validate canvas data.
+    let canvas = null;
+
+    if (
+        data.canvas &&
+        typeof data.canvas === 'object' &&
+        !Array.isArray(data.canvas)
+    ) {
+        const html = typeof data.canvas.html === 'string'
+            ? data.canvas.html.slice(0, MAX_FILE_CHARS)
+            : '';
+
+        canvas = {
+            type: String(
+                data.canvas.type || 'html'
+            ).slice(0, 40),
+
+            title: String(
+                data.canvas.title || 'Mora AI Preview'
+            ).slice(0, 200),
+
+            html
+        };
+    }
+
+    // Validate execution instructions.
+    const rawExecution =
+        data.execution &&
+        typeof data.execution === 'object'
+            ? data.execution
+            : {};
+
+    const language = String(
+        rawExecution.language || 'python'
+    ).toLowerCase();
+
+    const code = typeof rawExecution.code === 'string'
+        ? rawExecution.code.slice(0, 12000)
+        : '';
+
+    const execution = {
+        requested:
+            rawExecution.requested === true &&
+            language === 'python' &&
+            code.trim().length > 0,
+
+        language,
+
+        code
+    };
+
+    const terminal = typeof data.terminal === 'string'
+        ? data.terminal.slice(0, 10000)
+        : '';
+
+    return {
+        message: message || (
+            files.length
+                ? 'Mora AI generated your project files.'
+                : 'Mora AI processed your request.'
+        ),
+
+        steps,
+
+        files,
+
+        canvas,
+
+        execution,
+
+        terminal,
+
+        status: 'completed',
+
+        prompt: String(prompt || '').slice(0, MAX_PROMPT)
+    };
+}
 
 // ============================================================
 // MORA AI SYSTEM INSTRUCTIONS
@@ -452,7 +678,7 @@ async function askGemini(
 
             config: {
                 temperature: 0.2,
-                maxOutputTokens: 14000,
+                maxOutputTokens: 16000,
                 responseMimeType: 'application/json'
             }
         };
@@ -541,17 +767,7 @@ async function askGemini(
     // Retry with more explicit instructions.
     try {
         const correction = [
-            'Your previous response could not be processed.',
-            'Regenerate the answer from the original request.',
-            'Return exactly one complete valid JSON object.',
-            'Do not use Markdown fences.',
-            'Do not include text outside the JSON object.',
-            'Escape all quotation marks and newlines correctly.',
-            'Keep the response compact.',
-            'For website requests, prioritize a complete standalone HTML preview.',
-            'Include complete project files where appropriate.',
-            'Follow the required JSON schema.',
-            'Do not claim code was tested unless it actually ran.'
+node --check server.js
         ].join(' ');
 
         const second = await generate({
@@ -1250,6 +1466,34 @@ Provide a corrected solution. If appropriate, include corrected Python in execut
 // ============================================================
 // NON-STREAMING AGENT ENDPOINT
 // ============================================================
+
+app.post('/api/agent', async (req, res) => {
+    const prompt = validatePrompt(req, res);
+
+    if (!prompt) {
+        return;
+    }
+
+    try {
+        const result = await runAgent(prompt);
+
+        return res.json({
+            success: true,
+            result
+        });
+    } catch (error) {
+        console.error(
+            'Agent request failed:',
+            error
+        );
+
+        return res.status(errorStatus(error)).json({
+            success: false,
+            error: friendlyError(error)
+        });
+    }
+});
+
 // ============================================================
 // FRIENDLY ERROR HANDLING
 // ============================================================
