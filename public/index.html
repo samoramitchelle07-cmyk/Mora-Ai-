@@ -1,0 +1,1633 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#090b10">
+<title>Mora AI — Personal AI Workspace</title>
+
+<style>
+:root {
+    color-scheme: dark;
+    --bg: #090b10;
+    --panel: #11151e;
+    --panel2: #171c27;
+    --line: #2a3240;
+    --text: #edf1f8;
+    --muted: #929daf;
+    --accent: #9be7d7;
+    --blue: #8bb8ff;
+    --danger: #ff9b9b;
+    --radius: 15px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    background:
+        radial-gradient(ellipse at 50% -15%, #1a2933 0, transparent 45%),
+        var(--bg);
+    color: var(--text);
+    font: 14px/1.55 Inter, system-ui, -apple-system,
+          BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+button, input, textarea, select { font: inherit; }
+button { cursor: pointer; }
+button:disabled { opacity: .5; cursor: not-allowed; }
+
+button, input, textarea, select {
+    accent-color: var(--accent);
+}
+
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+.app {
+    display: grid;
+    grid-template-columns: 245px minmax(0, 1fr);
+    gap: 16px;
+    max-width: 1500px;
+    min-height: 100vh;
+    margin: auto;
+    padding: 16px;
+}
+
+.sidebar, .panel {
+    background: rgba(17,21,30,.96);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+}
+
+.sidebar {
+    height: calc(100vh - 32px);
+    position: sticky;
+    top: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 15px;
+    overflow: hidden;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 18px;
+    font-weight: 800;
+}
+
+.logo {
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    flex-shrink: 0;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--accent), var(--blue));
+    color: #091412;
+    font-weight: 900;
+}
+
+.muted { color: var(--muted); }
+.subbrand { font-size: 11px; font-weight: 400; color: var(--muted); }
+
+.btn {
+    border: 1px solid var(--line);
+    background: var(--panel2);
+    color: var(--text);
+    padding: 9px 12px;
+    border-radius: 10px;
+}
+
+.btn:hover { border-color: #637b8b; }
+
+.btn.primary {
+    background: var(--accent);
+    color: #071411;
+    border-color: var(--accent);
+    font-weight: 750;
+}
+
+.btn.danger { color: var(--danger); }
+
+.btn.full { width: 100%; text-align: left; }
+
+.side-label {
+    color: var(--muted);
+    text-transform: uppercase;
+    font-size: 10px;
+    letter-spacing: 1.3px;
+    margin: 6px 0;
+}
+
+.side-list {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    overflow: auto;
+}
+
+.side-item {
+    background: transparent;
+    border: 0;
+    color: #cbd2de;
+    text-align: left;
+    padding: 9px;
+    border-radius: 8px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.side-item:hover { background: #202734; }
+
+.side-bottom {
+    margin-top: auto;
+    padding-top: 12px;
+    border-top: 1px solid var(--line);
+    color: var(--muted);
+    font-size: 11px;
+}
+
+.dot {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    background: #d7a85b;
+    border-radius: 50%;
+    margin-right: 7px;
+}
+
+.dot.online { background: #6de1b5; }
+.dot.offline { background: #ff8181; }
+
+.main {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 13px;
+}
+
+.topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    padding: 3px 2px;
+}
+
+.actions { display: flex; gap: 7px; flex-wrap: wrap; }
+
+.hero {
+    padding: clamp(20px, 4vw, 44px);
+    text-align: center;
+}
+
+.eyebrow {
+    display: inline-block;
+    padding: 5px 11px;
+    border: 1px solid #35464c;
+    border-radius: 99px;
+    color: var(--accent);
+    font-size: 11px;
+    margin-bottom: 14px;
+}
+
+h1 {
+    margin: 0 0 13px;
+    font-size: clamp(30px, 5vw, 49px);
+    line-height: 1.1;
+    letter-spacing: -1.8px;
+}
+
+.gradient {
+    background: linear-gradient(100deg, #f2f4fa, #a8e8db 55%, #8bb8ff);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+}
+
+.hero > p {
+    max-width: 620px;
+    margin: 0 auto 23px;
+    color: var(--muted);
+}
+
+.composer {
+    max-width: 900px;
+    margin: auto;
+    padding: 12px;
+    text-align: left;
+    background: #0b0e14;
+    border: 1px solid #343e4c;
+    border-radius: 16px;
+}
+
+.composer:focus-within {
+    border-color: #77b8aa;
+    box-shadow: 0 0 0 3px #9be7d715;
+}
+
+textarea, input, select {
+    width: 100%;
+    color: var(--text);
+    background: #10151e;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    padding: 10px;
+}
+
+textarea {
+    display: block;
+    min-height: 95px;
+    max-height: 350px;
+    resize: vertical;
+    background: transparent;
+    border: 0;
+    outline: 0;
+}
+
+.composer-controls {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding-top: 11px;
+    border-top: 1px solid #252c37;
+}
+
+.composer-controls select { width: auto; max-width: 170px; }
+.spacer { flex: 1; }
+
+.suggestions {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0,1fr));
+    gap: 9px;
+    max-width: 900px;
+    margin: 14px auto 0;
+}
+
+.suggestion {
+    text-align: left;
+    padding: 12px;
+    min-height: 75px;
+    background: #11151e;
+    color: #cbd3df;
+    border: 1px solid var(--line);
+    border-radius: 11px;
+    font-size: 12px;
+}
+
+.suggestion strong {
+    display: block;
+    color: var(--text);
+    font-size: 13px;
+    margin-bottom: 3px;
+}
+
+.suggestion:hover { border-color: #718a95; }
+
+.conversation {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.message {
+    padding: 15px;
+    border: 1px solid var(--line);
+    border-radius: 13px;
+    background: var(--panel);
+    min-width: 0;
+}
+
+.message.user {
+    background: #151c27;
+    border-color: #354255;
+}
+
+.role {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+    margin-bottom: 7px;
+}
+
+.message-body {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.progress {
+    display: none;
+    padding: 11px 13px;
+    border: 1px solid #344b4a;
+    background: #101b1c;
+    border-radius: 10px;
+    color: #b8e7dc;
+}
+
+.progress.visible { display: block; }
+
+.workspace { overflow: hidden; }
+
+.workspace-head {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    flex-wrap: wrap;
+    padding: 11px;
+    border-bottom: 1px solid var(--line);
+}
+
+.workspace-title { font-weight: 750; margin-right: auto; }
+
+.tab.active {
+    background: #263d3b;
+    border-color: #547a73;
+    color: #c9fff1;
+}
+
+.pane { display: none; padding: 13px; }
+.pane.active { display: block; }
+
+.preview-frame {
+    display: block;
+    width: 100%;
+    height: min(65vh, 650px);
+    background: white;
+    border: 0;
+    border-radius: 9px;
+}
+
+.empty {
+    padding: 22px;
+    text-align: center;
+    color: var(--muted);
+}
+
+.files-list { display: flex; flex-direction: column; gap: 9px; }
+
+.file-card {
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.file-head {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    padding: 9px;
+    background: #171c26;
+}
+
+.file-name { flex: 1; overflow-wrap: anywhere; font-size: 12px; }
+
+.code {
+    padding: 12px;
+    margin: 0;
+    background: #080a0e;
+    color: #d5e3e7;
+    font: 12px/1.6 ui-monospace, monospace;
+    white-space: pre;
+    overflow: auto;
+    max-height: 400px;
+}
+
+.terminal {
+    min-height: 130px;
+    background: #080a0e;
+    color: #b9e6cf;
+    padding: 13px;
+    border-radius: 9px;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    font: 12px/1.6 ui-monospace, monospace;
+}
+
+.workspace-foot, .footnote {
+    color: var(--muted);
+    font-size: 11px;
+    padding: 11px;
+}
+
+.modal-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 10;
+    padding: 16px;
+    background: #000b;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-backdrop.open { display: flex; }
+
+.modal {
+    width: min(650px, 100%);
+    max-height: 88vh;
+    overflow: auto;
+    background: #11151e;
+    border: 1px solid #36404e;
+    border-radius: 16px;
+    padding: 17px;
+}
+
+.modal-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 14px;
+}
+
+.modal-top h2 { margin: 0; font-size: 18px; }
+
+.field { margin-bottom: 13px; }
+.field label { display: block; font-size: 12px; margin-bottom: 6px; }
+.field small { display: block; color: var(--muted); margin-top: 5px; }
+.modal-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.project-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 10px;
+}
+
+.project-meta { flex: 1; min-width: 150px; }
+.project-meta strong { display: block; overflow-wrap: anywhere; }
+.project-meta small { color: var(--muted); }
+
+.toast {
+    display: none;
+    position: fixed;
+    z-index: 20;
+    bottom: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: 90vw;
+    padding: 11px 15px;
+    border-radius: 10px;
+    background: #e9fff8;
+    color: #10211b;
+    box-shadow: 0 8px 40px #0008;
+}
+
+.toast.show { display: block; }
+.hidden { display: none !important; }
+.small { font-size: 11px; }
+
+@media(max-width:900px) {
+    .app { grid-template-columns: 1fr; padding: 10px; gap: 10px; }
+    .sidebar { position: static; height: auto; }
+    .sidebar .side-label, .sidebar .side-list { display: none; }
+    .side-bottom { margin-top: 0; }
+    .suggestions { grid-template-columns: repeat(2,minmax(0,1fr)); }
+}
+
+@media(max-width:520px) {
+    .hero { padding: 20px 12px; }
+    .composer-controls select { max-width: 140px; }
+    .suggestions { grid-template-columns: repeat(2,minmax(0,1fr)); }
+    .workspace-head { gap: 5px; }
+    .workspace-head .btn { padding: 7px 8px; }
+    .topbar { align-items: flex-start; }
+}
+</style>
+</head>
+
+<body>
+<div class="app">
+
+<aside class="sidebar">
+    <div class="brand">
+        <div class="logo">M</div>
+        <div>
+            Mora AI
+            <div class="subbrand">Personal AI workspace</div>
+        </div>
+    </div>
+
+    <button id="newBtn" class="btn full">＋ New conversation</button>
+    <button id="projectsBtn" class="btn full">▦ Projects <span id="projectCount">0</span></button>
+    <button id="historyBtn" class="btn full">◷ Recent activity</button>
+
+    <div>
+        <div class="side-label">Saved projects</div>
+        <div id="sidebarProjects" class="side-list">
+            <div class="empty">No saved projects.</div>
+        </div>
+    </div>
+
+    <div class="side-bottom">
+        <div><span id="healthDot" class="dot"></span><span id="healthText">Checking backend…</span></div>
+        <div style="margin-top:7px">AI chat · Project canvas · File exports</div>
+        <div class="small" style="margin-top:7px">Review generated code before production use.</div>
+    </div>
+</aside>
+
+<main class="main">
+
+<header class="topbar">
+    <div class="muted">Your workspace for building, testing, and learning.</div>
+    <div class="actions">
+        <button id="settingsBtn" class="btn">⚙ AI settings</button>
+        <button id="refreshBtn" class="btn">↻ Refresh</button>
+    </div>
+</header>
+
+<section id="heroCard" class="panel hero">
+    <div class="eyebrow">✦ Your ideas, into working projects</div>
+    <h1>What are we <span class="gradient">building today?</span></h1>
+    <p>Ask Mora AI to build a website, solve a coding problem, debug an error, or explain a concept.</p>
+
+    <form id="promptForm" class="composer">
+        <textarea id="prompt" maxlength="12000"
+            placeholder="Describe what you want to create…"
+            required></textarea>
+
+        <div class="composer-controls">
+            <select id="mode" aria-label="Task mode">
+                <option value="general">General</option>
+                <option value="coding">Coding</option>
+                <option value="website">Website / Canvas</option>
+                <option value="debugging">Debugging</option>
+                <option value="research">Research</option>
+                <option value="security">Authorized security review</option>
+            </select>
+
+            <select id="provider" aria-label="AI provider">
+                <option value="gemini">Gemini</option>
+                <option value="groq">Groq</option>
+                <option value="openrouter">OpenRouter</option>
+            </select>
+
+            <span class="spacer"></span>
+            <button id="sendBtn" class="btn primary" type="submit">Send ↗</button>
+        </div>
+        <div class="small muted" style="padding:9px 2px 0">
+            Use AI settings to configure a personal key and model.
+        </div>
+    </form>
+
+    <div class="suggestions">
+        <button class="suggestion" data-prompt="Build a polished, responsive business landing page. Return complete HTML, CSS and JavaScript files.">
+            <strong>✧ Build a website</strong>Design a responsive interface
+        </button>
+        <button class="suggestion" data-prompt="Help me debug my code. Ask me to provide the relevant code and error if I have not included them.">
+            <strong>⌘ Debug code</strong>Find and fix a problem
+        </button>
+        <button class="suggestion" data-prompt="Write a simple Python program that calculates compound interest. Explain the formula and include a safe test.">
+            <strong>▶ Python help</strong>Create a small program
+        </button>
+        <button class="suggestion" data-prompt="Explain how to structure a secure Express application with validation, authentication, rate limiting, and safe error handling.">
+            <strong>◇ Learn a concept</strong>Understand it step by step
+        </button>
+    </div>
+</section>
+
+<section id="conversation" class="conversation" aria-live="polite"></section>
+<div id="progress" class="progress">Mora AI is working…</div>
+
+<section id="workspace" class="panel hidden">
+    <div class="workspace-head">
+        <div class="workspace-title">Workspace</div>
+        <button class="btn tab active" data-pane="preview">Preview</button>
+        <button class="btn tab" data-pane="files">Files <span id="fileCount">0</span></button>
+        <button class="btn tab" data-pane="terminal">Output</button>
+        <button id="testBtn" class="btn">Check HTML</button>
+        <button id="saveBtn" class="btn" disabled>Save project</button>
+        <button id="exportBtn" class="btn" disabled>Export ZIP</button>
+        <button id="closeWorkspaceBtn" class="btn">Close</button>
+    </div>
+
+    <div id="previewPane" class="pane active">
+        <div id="previewEmpty" class="empty">Generate an HTML file to see the preview.</div>
+        <iframe id="previewFrame" class="preview-frame hidden"
+            title="Generated HTML preview" sandbox="allow-scripts"></iframe>
+    </div>
+
+    <div id="filesPane" class="pane">
+        <div id="filesList" class="files-list">
+            <div class="empty">Generated files will appear here.</div>
+        </div>
+    </div>
+
+    <div id="terminalPane" class="pane">
+        <pre id="terminalOutput" class="terminal">No output yet.</pre>
+    </div>
+
+    <div class="workspace-foot">
+        HTML checks are static checks only. Preview code runs in a sandboxed iframe.
+        Review all generated code before using it in production.
+    </div>
+</section>
+
+<div class="footnote">Mora AI can make mistakes. Review generated code before deploying it.</div>
+</main>
+</div>
+
+<div id="modalBackdrop" class="modal-backdrop">
+    <section class="modal">
+        <div class="modal-top">
+            <h2 id="modalTitle">Settings</h2>
+            <button id="modalClose" class="btn">Close ✕</button>
+        </div>
+        <div id="modalContent"></div>
+    </section>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+(() => {
+'use strict';
+
+const $ = selector => document.querySelector(selector);
+
+const state = {
+    files: [],
+    projectId: null,
+    projectName: '',
+    prompt: '',
+    busy: false,
+    providers: []
+};
+
+const storageKeys = {
+    token: 'mora_ai_api_token',
+    provider: 'mora_ai_provider',
+    model: 'mora_ai_model',
+    personalKeys: 'mora_ai_personal_keys'
+};
+
+function getStored(key, fallback = '') {
+    try {
+        return localStorage.getItem(key) ?? fallback;
+    } catch {
+        return fallback;
+    }
+}
+
+function setStored(key, value) {
+    try {
+        if (value) localStorage.setItem(key, value);
+        else localStorage.removeItem(key);
+    } catch {
+        toast('Browser storage is unavailable.');
+    }
+}
+
+function getPersonalKeys() {
+    try {
+        return JSON.parse(getStored(storageKeys.personalKeys, '{}')) || {};
+    } catch {
+        return {};
+    }
+}
+
+function authHeaders(json = false) {
+    const headers = {};
+
+    if (json) headers['Content-Type'] = 'application/json';
+
+    const token = getStored(storageKeys.token);
+
+    if (token) {
+        headers.Authorization = `Bearer ${token}`;
+    }
+
+    return headers;
+}
+
+async function api(url, options = {}) {
+    const response = await fetch(url, {
+        ...options,
+        headers: {
+            ...authHeaders(Boolean(options.body)),
+            ...(options.headers || {})
+        }
+    });
+
+    const contentType = response.headers.get('content-type') || '';
+    const data = contentType.includes('application/json')
+        ? await response.json()
+        : null;
+
+    if (!response.ok) {
+        throw new Error(data?.error || `Request failed (${response.status})`);
+    }
+
+    return data;
+}
+
+function toast(message) {
+    const element = $('#toast');
+    element.textContent = message;
+    element.classList.add('show');
+
+    clearTimeout(toast.timer);
+    toast.timer = setTimeout(() => {
+        element.classList.remove('show');
+    }, 3500);
+}
+
+function addMessage(role, text) {
+    const article = document.createElement('article');
+    article.className = `message ${role}`;
+
+    const label = document.createElement('div');
+    label.className = 'role';
+    label.textContent = role === 'user' ? 'You' : 'Mora AI';
+
+    const body = document.createElement('div');
+    body.className = 'message-body';
+    body.textContent = String(text || '');
+
+    article.append(label, body);
+    $('#conversation').append(article);
+
+    article.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    return article;
+}
+
+function showProgress(message) {
+    $('#progress').textContent = message;
+    $('#progress').classList.add('visible');
+}
+
+function hideProgress() {
+    $('#progress').classList.remove('visible');
+}
+
+function setPane(name) {
+    document.querySelectorAll('[data-pane]').forEach(button => {
+        button.classList.toggle('active', button.dataset.pane === name);
+    });
+
+    ['preview', 'files', 'terminal'].forEach(pane => {
+        $(`#${pane}Pane`).classList.toggle('active', pane === name);
+    });
+}
+
+function safeDownloadName(name) {
+    return String(name || 'mora-output.txt')
+        .replace(/[<>:"|?*\x00-\x1f]/g, '_')
+        .replace(/\.\./g, '_');
+}
+
+function downloadText(name, content) {
+    const blob = new Blob([content || ''], {
+        type: 'text/plain;charset=utf-8'
+    });
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+
+    link.href = url;
+    link.download = safeDownloadName(name);
+    link.click();
+
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function renderFiles() {
+    $('#fileCount').textContent = state.files.length;
+
+    const host = $('#filesList');
+    host.replaceChildren();
+
+    if (!state.files.length) {
+        const empty = document.createElement('div');
+        empty.className = 'empty';
+        empty.textContent = 'No project files available.';
+        host.append(empty);
+        return;
+    }
+
+    for (const file of state.files) {
+        const card = document.createElement('div');
+        card.className = 'file-card';
+
+        const header = document.createElement('div');
+        header.className = 'file-head';
+
+        const name = document.createElement('span');
+        name.className = 'file-name';
+        name.textContent = file.name || file.path || 'Untitled file';
+
+        const download = document.createElement('button');
+        download.className = 'btn';
+        download.textContent = 'Download';
+        download.onclick = () => downloadText(
+            file.name || file.path,
+            file.content
+        );
+
+        header.append(name, download);
+
+        const code = document.createElement('pre');
+        code.className = 'code';
+        code.textContent = file.content || '';
+
+        card.append(header, code);
+        host.append(card);
+    }
+}
+
+function mergeFiles(oldFiles, newFiles) {
+    const map = new Map();
+
+    for (const file of oldFiles || []) {
+        const name = file.name || file.path;
+        if (name) map.set(name, file);
+    }
+
+    for (const file of newFiles || []) {
+        const name = file.name || file.path;
+        if (name) {
+            map.set(name, { ...map.get(name), ...file });
+        }
+    }
+
+    return Array.from(map.values());
+}
+
+function findHtmlFile() {
+    return state.files.find(file =>
+        /\.html?$/i.test(file.name || file.path || '')
+    );
+}
+
+function updatePreview() {
+    const htmlFile = findHtmlFile();
+
+    if (!htmlFile || typeof htmlFile.content !== 'string') {
+        $('#previewFrame').classList.add('hidden');
+        $('#previewEmpty').classList.remove('hidden');
+        $('#previewFrame').srcdoc = '';
+        return false;
+    }
+
+    $('#previewFrame').srcdoc = htmlFile.content;
+    $('#previewFrame').classList.remove('hidden');
+    $('#previewEmpty').classList.add('hidden');
+    return true;
+}
+
+function renderResult(result) {
+    if (Array.isArray(result.files)) {
+        state.files = mergeFiles(state.files, result.files);
+    }
+
+    if (result.prompt) state.prompt = result.prompt;
+
+    if (typeof result.terminal === 'string') {
+        $('#terminalOutput').textContent = result.terminal;
+    }
+
+    renderFiles();
+    const hasPreview = updatePreview();
+
+    $('#workspace').classList.remove('hidden');
+    $('#saveBtn').disabled = state.files.length === 0;
+    $('#exportBtn').disabled = !state.projectId;
+
+    setPane(hasPreview ? 'preview' : 'files');
+
+    addMessage('assistant', result.message || 'Finished.');
+
+    if (Array.isArray(result.steps) && result.steps.length) {
+        const summary = result.steps.map(step =>
+            `${step.isError ? 'Warning' : 'Step'}: ${step.thought || ''}` +
+            (step.output ? `\n${step.output}` : '')
+        ).join('\n\n');
+
+        addMessage('assistant', summary);
+    }
+}
+
+function getSelectedProvider() {
+    return $('#provider').value;
+}
+
+function getSelectedModel() {
+    return getStored(storageKeys.model, '');
+}
+
+function getSelectedKey() {
+    const keys = getPersonalKeys();
+    return keys[getSelectedProvider()] || '';
+}
+
+function readSseBlock(block, handler) {
+    if (!block.trim()) return;
+
+    let eventName = 'message';
+    const lines = [];
+
+    for (const line of block.split(/\r?\n/)) {
+        if (line.startsWith('event:')) {
+            eventName = line.slice(6).trim();
+        } else if (line.startsWith('data:')) {
+            lines.push(line.slice(5).trimStart());
+        }
+    }
+
+    if (!lines.length) return;
+
+    const data = JSON.parse(lines.join('\n'));
+    handler(eventName, data);
+}
+
+async function readSse(response, handler) {
+    if (!response.body) {
+        throw new Error('The server did not return a response stream.');
+    }
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+
+    while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+
+        let match;
+        while ((match = /\r?\n\r?\n/.exec(buffer)) !== null) {
+            const block = buffer.slice(0, match.index);
+            buffer = buffer.slice(match.index + match[0].length);
+            readSseBlock(block, handler);
+        }
+    }
+
+    buffer += decoder.decode();
+
+    if (buffer.trim()) readSseBlock(buffer, handler);
+}
+
+async function runPrompt(rawPrompt) {
+    if (state.busy) return toast('Please wait for the current request.');
+
+    const promptText = String(rawPrompt || '').trim();
+    if (!promptText) return;
+
+    state.busy = true;
+    state.prompt = promptText;
+
+    addMessage('user', promptText);
+    $('#prompt').value = '';
+    $('#sendBtn').disabled = true;
+    showProgress('Connecting to Mora AI…');
+
+    let resultReceived = false;
+
+    try {
+        const mode = $('#mode').value;
+        const model = getSelectedModel();
+        const apiKey = getSelectedKey();
+
+        const promptWithMode =
+            `Task mode: ${mode}\n\n` +
+            `Current project: ${state.projectName || 'New project'}\n\n` +
+            promptText;
+
+        const payload = {
+            prompt: promptWithMode,
+            provider: getSelectedProvider(),
+            model: model || undefined,
+            apiKey: apiKey || undefined,
+
+            // The backend accepts files and appends them as context.
+            files: state.files.map(file => ({
+                name: file.name || file.path || 'file.txt',
+                content: file.content || ''
+            }))
+        };
+
+        const response = await fetch('/api/agent/stream', {
+            method: 'POST',
+            headers: authHeaders(true),
+            body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+            let errorData = {};
+            try { errorData = await response.json(); } catch {}
+            throw new Error(errorData.error || `Request failed (${response.status})`);
+        }
+
+        await readSse(response, (event, data) => {
+            if (event === 'progress') {
+                showProgress(data.message || 'Mora AI is working…');
+            }
+
+            if (event === 'delta') {
+                // The backend sends the completed response in one delta.
+                showProgress('Preparing your response…');
+            }
+
+            if (event === 'result') {
+                resultReceived = true;
+                renderResult(data);
+            }
+
+            if (event === 'error') {
+                throw new Error(data.message || data.error || 'AI request failed.');
+            }
+        });
+
+        if (!resultReceived) {
+            throw new Error(
+                'The connection ended without a result. Check the server logs.'
+            );
+        }
+
+        toast('Response received.');
+
+    } catch (error) {
+        console.error('Mora AI:', error);
+        addMessage('assistant', `Request failed:\n${error.message}`);
+        toast(error.message);
+    } finally {
+        state.busy = false;
+        $('#sendBtn').disabled = false;
+        hideProgress();
+    }
+}
+
+async function checkHtml() {
+    const htmlFile = findHtmlFile();
+
+    if (!htmlFile) {
+        return toast('Generate an HTML file first.');
+    }
+
+    setPane('terminal');
+    $('#terminalOutput').textContent = 'Checking HTML…';
+
+    try {
+        const result = await api('/api/test/html', {
+            method: 'POST',
+            body: JSON.stringify({ html: htmlFile.content || '' })
+        });
+
+        const checks = result.checks || {};
+        const warnings = result.warnings || [];
+
+        $('#terminalOutput').textContent =
+            `HTML static check: ${result.success ? 'COMPLETED' : 'FAILED'}\n\n` +
+            Object.entries(checks)
+                .map(([name, passed]) =>
+                    `${passed ? '✓' : '✗'} ${name}: ${passed ? 'yes' : 'no'}`
+                ).join('\n') +
+            '\n\nWarnings:\n' +
+            (warnings.length ? warnings.join('\n') : 'No warnings reported.') +
+            '\n\nThis is a static check, not a browser execution test.';
+
+        toast('HTML checks completed.');
+    } catch (error) {
+        $('#terminalOutput').textContent = error.message;
+        toast(error.message);
+    }
+}
+
+async function refreshProjects() {
+    try {
+        const data = await api('/api/projects');
+        const projects = data.projects || [];
+
+        $('#projectCount').textContent = projects.length;
+
+        const host = $('#sidebarProjects');
+        host.replaceChildren();
+
+        if (!projects.length) {
+            const empty = document.createElement('div');
+            empty.className = 'empty';
+            empty.textContent = 'No saved projects.';
+            host.append(empty);
+        }
+
+        projects.slice(0, 12).forEach(project => {
+            const button = document.createElement('button');
+            button.className = 'side-item';
+            button.textContent = project.name || 'Untitled project';
+            button.title = button.textContent;
+            button.onclick = () => loadProject(project.id);
+            host.append(button);
+        });
+    } catch (error) {
+        $('#healthText').textContent = 'API needs attention';
+        $('#healthDot').className = 'dot offline';
+    }
+}
+
+async function saveProject() {
+    if (!state.files.length) {
+        return toast('Generate files before saving a project.');
+    }
+
+    const defaultName = state.projectName ||
+        (state.files[0].name || 'Mora AI Project');
+
+    const name = prompt('Project name:', defaultName);
+    if (!name || !name.trim()) return;
+
+    try {
+        /*
+         * This backend's POST /api/projects creates a new project.
+         * It expects "name", not "title".
+         */
+        const data = await api('/api/projects', {
+            method: 'POST',
+            body: JSON.stringify({
+                name: name.trim(),
+                description: state.prompt,
+                files: state.files
+            })
+        });
+
+        state.projectId = data.project.id;
+        state.projectName = data.project.name;
+
+        $('#exportBtn').disabled = false;
+
+        toast('Project saved.');
+        await refreshProjects();
+
+    } catch (error) {
+        toast(error.message);
+    }
+}
+
+async function loadProject(id) {
+    try {
+        const data = await api(`/api/projects/${encodeURIComponent(id)}`);
+        const project = data.project;
+
+        state.projectId = project.id;
+        state.projectName = project.name || '';
+        state.files = Array.isArray(project.files) ? project.files : [];
+        state.prompt = project.description || '';
+
+        $('#conversation').replaceChildren();
+
+        renderFiles();
+        const hasPreview = updatePreview();
+
+        $('#workspace').classList.remove('hidden');
+        $('#saveBtn').disabled = state.files.length === 0;
+        $('#exportBtn').disabled = false;
+
+        $('#terminalOutput').textContent =
+            'Project loaded. No code has been executed.';
+
+        setPane(hasPreview ? 'preview' : 'files');
+
+        addMessage(
+            'assistant',
+            `Opened project: ${state.projectName}\n` +
+            `${state.files.length} file(s) loaded. Describe the changes you want.`
+        );
+
+        toast('Project opened.');
+    } catch (error) {
+        toast(error.message);
+    }
+}
+
+async function exportProject(id = state.projectId) {
+    if (!id) return toast('Save a project before exporting.');
+
+    try {
+        const response = await fetch(
+            `/api/projects/${encodeURIComponent(id)}/export.zip`,
+            { headers: authHeaders() }
+        );
+
+        if (!response.ok) {
+            let data = {};
+            try { data = await response.json(); } catch {}
+            throw new Error(data.error || 'Export failed.');
+        }
+
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+
+        link.href = url;
+        link.download = `${safeDownloadName(state.projectName || 'mora-project')}.zip`;
+        link.click();
+
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch (error) {
+        toast(error.message);
+    }
+}
+
+async function showProjects() {
+    $('#modalTitle').textContent = 'Saved projects';
+    $('#modalContent').textContent = 'Loading…';
+    $('#modalBackdrop').classList.add('open');
+
+    try {
+        const data = await api('/api/projects');
+        const projects = data.projects || [];
+        const host = $('#modalContent');
+
+        host.replaceChildren();
+
+        if (!projects.length) {
+            host.textContent = 'No saved projects yet.';
+            return;
+        }
+
+        projects.forEach(project => {
+            const row = document.createElement('div');
+            row.className = 'project-row';
+
+            const meta = document.createElement('div');
+            meta.className = 'project-meta';
+
+            const name = document.createElement('strong');
+            name.textContent = project.name || 'Untitled project';
+
+            const details = document.createElement('small');
+            details.textContent =
+                `${new Date(project.updatedAt || project.createdAt).toLocaleString()} · ` +
+                `${(project.files || []).length} file(s)`;
+
+            meta.append(name, details);
+
+            const open = document.createElement('button');
+            open.className = 'btn';
+            open.textContent = 'Open';
+            open.onclick = () => {
+                $('#modalBackdrop').classList.remove('open');
+                loadProject(project.id);
+            };
+
+            const zip = document.createElement('button');
+            zip.className = 'btn';
+            zip.textContent = 'ZIP';
+            zip.onclick = () => exportProject(project.id);
+
+            const remove = document.createElement('button');
+            remove.className = 'btn danger';
+            remove.textContent = 'Delete';
+
+            remove.onclick = async () => {
+                if (!confirm(`Delete "${project.name}"?`)) return;
+
+                try {
+                    await api(`/api/projects/${encodeURIComponent(project.id)}`, {
+                        method: 'DELETE'
+                    });
+
+                    if (state.projectId === project.id) resetWorkspace();
+
+                    toast('Project deleted.');
+                    await refreshProjects();
+                    await showProjects();
+                } catch (error) {
+                    toast(error.message);
+                }
+            };
+
+            row.append(meta, open, zip, remove);
+            host.append(row);
+        });
+    } catch (error) {
+        $('#modalContent').textContent = error.message;
+    }
+}
+
+async function showHistory() {
+    $('#modalTitle').textContent = 'Recent activity';
+    $('#modalContent').textContent = 'Loading…';
+    $('#modalBackdrop').classList.add('open');
+
+    try {
+        const data = await api('/api/history');
+        const history = data.history || [];
+        const host = $('#modalContent');
+
+        host.replaceChildren();
+
+        if (!history.length) {
+            host.textContent = 'No history available.';
+            return;
+        }
+
+        history.forEach(item => {
+            const row = document.createElement('div');
+            row.className = 'project-row';
+
+            const meta = document.createElement('div');
+            meta.className = 'project-meta';
+
+            const promptText = document.createElement('strong');
+            promptText.textContent = item.prompt || 'Previous request';
+
+            const time = document.createElement('small');
+            time.textContent = new Date(
+                item.timestamp || item.createdAt || Date.now()
+            ).toLocaleString();
+
+            meta.append(promptText, time);
+
+            const reuse = document.createElement('button');
+            reuse.className = 'btn';
+            reuse.textContent = 'Reuse';
+            reuse.onclick = () => {
+                $('#prompt').value = item.prompt || '';
+                $('#modalBackdrop').classList.remove('open');
+                $('#prompt').focus();
+            };
+
+            row.append(meta, reuse);
+            host.append(row);
+        });
+    } catch (error) {
+        $('#modalContent').textContent = error.message;
+    }
+}
+
+async function checkHealth() {
+    try {
+        const health = await api('/api/health');
+
+        $('#healthDot').className = 'dot online';
+        $('#healthText').textContent =
+            health.status === 'online' ? 'Backend online' : 'Backend responding';
+
+        const providers = health.providers || [];
+
+        if (providers.length) {
+            $('#healthText').textContent +=
+                ` · ${providers.filter(p => p.configured).length} provider(s) configured`;
+        }
+    } catch {
+        $('#healthDot').className = 'dot offline';
+        $('#healthText').textContent = 'Backend offline or token required';
+    }
+}
+
+// ----------------------------------------------------------
+// PROVIDER SETTINGS
+// ----------------------------------------------------------
+
+function openSettings() {
+    $('#modalTitle').textContent = 'AI provider settings';
+
+    const provider = getSelectedProvider();
+    const keys = getPersonalKeys();
+    const key = keys[provider] || '';
+
+    const currentModel = getSelectedModel();
+
+    $('#modalContent').innerHTML = `
+        <div class="field">
+            <label for="settingsToken">Mora API access token</label>
+            <input id="settingsToken" type="password"
+                autocomplete="off" placeholder="Optional shared server token">
+            <small>Required only if your server has MORA_API_TOKEN configured. Do not share it.</small>
+        </div>
+
+        <div class="field">
+            <label for="settingsProvider">AI provider</label>
+            <select id="settingsProvider">
+                <option value="gemini">Gemini</option>
+                <option value="groq">Groq</option>
+                <option value="openrouter">OpenRouter</option>
+            </select>
+        </div>
+
+        <div class="field">
+            <label for="settingsModel">Model override (optional)</label>
+            <input id="settingsModel" value="${escapeAttribute(currentModel)}"
+                placeholder="Leave blank to use the server default">
+            <small>Enter a model ID supported by the selected provider.</small>
+        </div>
+
+        <div class="field">
+            <label for="settingsKey">Personal API key</label>
+            <input id="settingsKey" type="password"
+                autocomplete="off" value="${escapeAttribute(key)}"
+                placeholder="Paste your provider API key">
+            <small>Your key is sent to the backend when you make a request. This page stores it in this browser's local storage. Avoid using this on a shared device.</small>
+        </div>
+
+        <div class="modal-actions">
+            <button id="saveSettings" class="btn primary">Save settings</button>
+            <button id="testProvider" class="btn">Test connection</button>
+            <button id="removeKey" class="btn danger">Remove personal key</button>
+        </div>
+
+        <div id="providerStatus" class="small muted" style="margin-top:13px"></div>
+
+        <hr style="border-color:var(--line);margin:18px 0">
+
+        <div class="small muted">
+            Server administrator keys are configured through environment variables.
+            Personal keys do not replace or change the administrator's environment variables.
+        </div>
+    `;
+
+    $('#settingsProvider').value = provider;
+    $('#settingsToken').value = getStored(storageKeys.token);
+
+    $('#settingsProvider').onchange = () => {
+        const selected = $('#settingsProvider').value;
+        const savedKeys = getPersonalKeys();
+
+        $('#settingsKey').value = savedKeys[selected] || '';
+        $('#settingsModel').value = selected === getSelectedProvider()
+            ? getSelectedModel()
+            : '';
+    };
+
+    $('#saveSettings').onclick = () => {
+        const selected = $('#settingsProvider').value;
+        const updatedKeys = getPersonalKeys();
+        const enteredKey = $('#settingsKey').value.trim();
+
+        if (enteredKey) updatedKeys[selected] = enteredKey;
+        else delete updatedKeys[selected];
+
+        setStored(storageKeys.personalKeys, JSON.stringify(updatedKeys));
+        setStored(storageKeys.token, $('#settingsToken').value.trim());
+        setStored(storageKeys.provider, selected);
+        setStored(storageKeys.model, $('#settingsModel').value.trim());
+
+        $('#provider').value = selected;
+
+        toast('AI settings saved in this browser.');
+        checkHealth();
+        refreshProjects();
+    };
+
+    $('#removeKey').onclick = () => {
+        const selected = $('#settingsProvider').value;
+        const updatedKeys = getPersonalKeys();
+
+        delete updatedKeys[selected];
+
+        setStored(storageKeys.personalKeys, JSON.stringify(updatedKeys));
+        $('#settingsKey').value = '';
+
+        toast('Personal key removed from this browser.');
+    };
+
+    $('#testProvider').onclick = async () => {
+        const selected = $('#settingsProvider').value;
+        const apiKey = $('#settingsKey').value.trim();
+        const model = $('#settingsModel').value.trim();
+
+        const status = $('#providerStatus');
+        status.textContent = 'Testing provider connection…';
+
+        try {
+            const result = await api('/api/providers/test', {
+                method: 'POST',
+                body: JSON.stringify({
+                    provider: selected,
+                    apiKey: apiKey || undefined,
+                    model: model || undefined
+                })
+            });
+
+            status.textContent = result.message ||
+                `Provider accepted the request (${result.model || 'default model'}).`;
+        } catch (error) {
+            status.textContent = `Connection test failed: ${error.message}`;
+        }
+    };
+
+    $('#modalBackdrop').classList.add('open');
+}
+
+function escapeAttribute(value) {
+    return String(value || '').replace(/[&<>"']/g, character => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+    })[character]);
+}
+
+function resetWorkspace() {
+    if (state.busy) {
+        toast('Wait for the current request to finish.');
+        return;
+    }
+
+    state.files = [];
+    state.projectId = null;
+    state.projectName = '';
+    state.prompt = '';
+
+    $('#conversation').replaceChildren();
+    $('#workspace').classList.add('hidden');
+    $('#prompt').value = '';
+    $('#terminalOutput').textContent = 'No output yet.';
+    $('#saveBtn').disabled = true;
+    $('#exportBtn').disabled = true;
+
+    renderFiles();
+    updatePreview();
+    setPane('preview');
+}
+
+$('#promptForm').addEventListener('submit', event => {
+    event.preventDefault();
+    runPrompt($('#prompt').value);
+});
+
+document.querySelectorAll('.suggestion').forEach(button => {
+    button.onclick = () => {
+        $('#prompt').value = button.dataset.prompt;
+        $('#prompt').focus();
+    };
+});
+
+$('#newBtn').onclick = resetWorkspace;
+$('#projectsBtn').onclick = showProjects;
+$('#historyBtn').onclick = showHistory;
+$('#settingsBtn').onclick = openSettings;
+$('#refreshBtn').onclick = async () => {
+    await checkHealth();
+    await refreshProjects();
+};
+$('#saveBtn').onclick = saveProject;
+$('#exportBtn').onclick = () => exportProject();
+$('#testBtn').onclick = checkHtml;
+
+$('#closeWorkspaceBtn').onclick = () => {
+    $('#workspace').classList.add('hidden');
+};
+
+document.querySelectorAll('[data-pane]').forEach(button => {
+    button.onclick = () => setPane(button.dataset.pane);
+});
+
+$('#modalClose').onclick = () => {
+    $('#modalBackdrop').classList.remove('open');
+};
+
+$('#modalBackdrop').addEventListener('click', event => {
+    if (event.target === $('#modalBackdrop')) {
+        $('#modalBackdrop').classList.remove('open');
+    }
+});
+
+$('#prompt').addEventListener('keydown', event => {
+    if (
+        event.key === 'Enter' &&
+        !event.shiftKey &&
+        !event.isComposing
+    ) {
+        event.preventDefault();
+        $('#promptForm').requestSubmit();
+    }
+});
+
+// Restore provider selection.
+const storedProvider = getStored(storageKeys.provider, 'gemini');
+
+$('#provider').value = [
+    'gemini', 'groq', 'openrouter'
+].includes(storedProvider) ? storedProvider : 'gemini';
+
+$('#provider').addEventListener('change', () => {
+    setStored(storageKeys.provider, $('#provider').value);
+});
+
+checkHealth();
+refreshProjects();
+
+})();
+</script>
+</body>
+</html>
