@@ -1,0 +1,3754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0b0c10">
+<title>Mora AI — Intelligent Workspace</title>
+
+<style>
+:root {
+    --bg: #0b0c10;
+    --panel: #111319;
+    --panel2: #171a22;
+    --panel3: #1d212b;
+    --gold: #e6bb63;
+    --gold2: #f7d992;
+    --text: #f2f2f5;
+    --muted: #9297a6;
+    --border: #292d38;
+    --green: #68dba2;
+    --red: #ff7474;
+    --blue: #81aaff;
+    --radius: 16px;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+}
+
+body {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system,
+                 BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: var(--text);
+    background: var(--bg);
+    overflow: hidden;
+}
+
+button, input, textarea, select {
+    font: inherit;
+}
+
+button {
+    cursor: pointer;
+}
+
+button:disabled {
+    opacity: .45;
+    cursor: not-allowed;
+}
+
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 2px;
+}
+
+.app {
+    height: 100dvh;
+    display: grid;
+    grid-template-columns: 260px minmax(0, 1fr);
+    overflow: hidden;
+}
+
+.sidebar {
+    background: #0e1015;
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    z-index: 30;
+}
+
+.brand {
+    height: 72px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 20px;
+    border-bottom: 1px solid var(--border);
+}
+
+.brand-logo {
+    width: 40px;
+    height: 40px;
+    border-radius: 13px;
+    display: grid;
+    place-items: center;
+    background: linear-gradient(135deg, #f8dfa1, #b98730);
+    color: #17130a;
+    font-weight: 950;
+    font-size: 21px;
+    box-shadow: 0 0 25px #e6bb6320;
+}
+
+.brand-name {
+    font-weight: 850;
+    letter-spacing: -.5px;
+    font-size: 18px;
+}
+
+.brand-sub {
+    color: var(--muted);
+    font-size: 10px;
+    letter-spacing: 2px;
+    margin-top: 3px;
+}
+
+.sidebar-content {
+    padding: 16px 12px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.primary-btn {
+    width: 100%;
+    border: 0;
+    padding: 13px;
+    border-radius: 12px;
+    color: #17130a;
+    background: linear-gradient(135deg, var(--gold2), #c18b30);
+    font-weight: 800;
+    display: flex;
+    justify-content: center;
+    gap: 9px;
+    align-items: center;
+}
+
+.primary-btn:hover {
+    filter: brightness(1.08);
+}
+
+.nav-section {
+    margin-top: 25px;
+}
+
+.nav-heading {
+    color: #727888;
+    font-size: 10px;
+    letter-spacing: 1.7px;
+    font-weight: 800;
+    padding: 0 10px 9px;
+    text-transform: uppercase;
+}
+
+.nav-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 12px;
+    background: transparent;
+    color: #c7cad4;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    text-align: left;
+    margin-bottom: 3px;
+    font-size: 13px;
+}
+
+.nav-btn:hover,
+.nav-btn.active {
+    background: #1b1d24;
+    border-color: #30313a;
+    color: var(--gold2);
+}
+
+.nav-icon {
+    width: 19px;
+    text-align: center;
+    font-size: 16px;
+}
+
+.side-list {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.side-item {
+    border: 0;
+    color: #aeb3c1;
+    background: transparent;
+    border-radius: 9px;
+    padding: 10px;
+    text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 12px;
+}
+
+.side-item:hover {
+    background: #1b1d24;
+    color: white;
+}
+
+.sidebar-footer {
+    padding: 13px;
+    border-top: 1px solid var(--border);
+}
+
+.account-card {
+    padding: 12px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 13px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.avatar {
+    width: 35px;
+    height: 35px;
+    border-radius: 11px;
+    display: grid;
+    place-items: center;
+    background: #3a3020;
+    color: var(--gold2);
+    font-weight: 900;
+}
+
+.account-name {
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.account-status {
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 3px;
+}
+
+.main {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+    position: relative;
+}
+
+.topbar {
+    height: 65px;
+    min-height: 65px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 0 22px;
+    background: #0d0f14;
+}
+
+.topbar-left,
+.topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.top-title {
+    font-weight: 800;
+    font-size: 14px;
+}
+
+.status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 10px;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    padding: 6px 9px;
+    border-radius: 30px;
+    white-space: nowrap;
+}
+
+.status-dot {
+    height: 7px;
+    width: 7px;
+    background: var(--green);
+    border-radius: 50%;
+}
+
+.icon-btn,
+.secondary-btn {
+    border: 1px solid var(--border);
+    background: var(--panel2);
+    color: #d6d9e2;
+    border-radius: 10px;
+    padding: 9px 12px;
+    font-size: 12px;
+}
+
+.icon-btn {
+    min-width: 37px;
+    min-height: 37px;
+    padding: 8px;
+}
+
+.icon-btn:hover,
+.secondary-btn:hover {
+    background: #242834;
+    border-color: #454957;
+}
+
+.content {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    position: relative;
+}
+
+.chat-area {
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 30px 18px 22px;
+    scroll-behavior: smooth;
+}
+
+.welcome {
+    max-width: 760px;
+    margin: 7vh auto 35px;
+    text-align: center;
+    padding: 0 12px;
+}
+
+.welcome-logo {
+    width: 67px;
+    height: 67px;
+    border-radius: 23px;
+    margin: 0 auto 23px;
+    display: grid;
+    place-items: center;
+    font-size: 34px;
+    color: #1b150a;
+    font-weight: 950;
+    background: linear-gradient(135deg, #f9e3a7, #c08b30);
+    box-shadow: 0 0 70px #e6bb6318;
+}
+
+.welcome h1 {
+    font-size: clamp(27px, 4vw, 40px);
+    margin: 0;
+    letter-spacing: -1.6px;
+}
+
+.gold-text {
+    color: var(--gold);
+}
+
+.welcome p {
+    font-size: 14px;
+    line-height: 1.8;
+    color: var(--muted);
+    max-width: 540px;
+    margin: 14px auto 27px;
+}
+
+.suggestions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    max-width: 650px;
+    margin: 0 auto;
+}
+
+.suggestion {
+    border: 1px solid var(--border);
+    background: #12141b;
+    color: #d8dbe5;
+    border-radius: 13px;
+    padding: 15px;
+    text-align: left;
+    transition: .15s;
+}
+
+.suggestion:hover {
+    border-color: #9b773b;
+    background: #1a1b20;
+}
+
+.suggestion strong {
+    display: block;
+    font-size: 12px;
+    margin-bottom: 6px;
+}
+
+.suggestion span {
+    color: var(--muted);
+    font-size: 11px;
+    line-height: 1.5;
+}
+
+.message {
+    max-width: 850px;
+    width: 100%;
+    margin: 0 auto 27px;
+    display: flex;
+    gap: 13px;
+    align-items: flex-start;
+}
+
+.message.user {
+    flex-direction: row-reverse;
+}
+
+.message-avatar {
+    flex: 0 0 34px;
+    height: 34px;
+    border-radius: 11px;
+    display: grid;
+    place-items: center;
+    font-size: 12px;
+    font-weight: 900;
+    background: #222631;
+    color: #fff;
+}
+
+.message.assistant .message-avatar {
+    background: linear-gradient(135deg, #f7dfa1, #b7852f);
+    color: #17130a;
+}
+
+.message.user .message-avatar {
+    background: #303a53;
+    color: #c8d7ff;
+}
+
+.message-body {
+    min-width: 0;
+    max-width: calc(100% - 47px);
+    flex: 1;
+}
+
+.message.user .message-body {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.message-label {
+    font-size: 10px;
+    color: var(--muted);
+    margin: 3px 0 8px;
+}
+
+.message-text {
+    font-size: 13px;
+    line-height: 1.8;
+    overflow-wrap: anywhere;
+}
+
+.message.user .message-text {
+    background: #222631;
+    border: 1px solid #323746;
+    padding: 12px 15px;
+    border-radius: 15px 5px 15px 15px;
+    max-width: 100%;
+    white-space: pre-wrap;
+}
+
+.message-text p {
+    margin: 0 0 12px;
+}
+
+.message-text p:last-child {
+    margin-bottom: 0;
+}
+
+.message-text h1,
+.message-text h2,
+.message-text h3 {
+    margin: 19px 0 10px;
+    line-height: 1.4;
+}
+
+.message-text h1 { font-size: 23px; }
+.message-text h2 { font-size: 19px; }
+.message-text h3 { font-size: 16px; }
+
+.message-text ul,
+.message-text ol {
+    padding-left: 23px;
+}
+
+.message-text li {
+    margin: 5px 0;
+}
+
+.message-text blockquote {
+    border-left: 3px solid var(--gold);
+    padding: 4px 13px;
+    color: #c7cad4;
+    margin: 13px 0;
+}
+
+.message-text a {
+    color: var(--gold2);
+}
+
+.message-text code {
+    background: #252832;
+    border-radius: 5px;
+    padding: 2px 5px;
+    font-family: Consolas, monospace;
+    font-size: 12px;
+}
+
+.code-block {
+    border: 1px solid var(--border);
+    border-radius: 11px;
+    overflow: hidden;
+    margin: 14px 0;
+    background: #090b10;
+}
+
+.code-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    background: #171a22;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+    font-size: 10px;
+    color: var(--muted);
+}
+
+.code-head button {
+    border: 1px solid #373b47;
+    background: #222631;
+    color: #e7e8ee;
+    border-radius: 6px;
+    padding: 5px 8px;
+    font-size: 10px;
+}
+
+.code-block pre {
+    margin: 0;
+    padding: 15px;
+    overflow-x: auto;
+    font: 12px/1.75 Consolas, Monaco, monospace;
+    color: #e3d7bc;
+    white-space: pre;
+}
+
+.message-actions {
+    display: flex;
+    gap: 7px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+}
+
+.message-actions button {
+    border: 0;
+    background: transparent;
+    color: #838999;
+    padding: 5px 7px;
+    border-radius: 6px;
+    font-size: 10px;
+}
+
+.message-actions button:hover {
+    color: var(--gold2);
+    background: #20232b;
+}
+
+.message-image {
+    max-width: 100%;
+    width: min(100%, 550px);
+    border-radius: 13px;
+    border: 1px solid var(--border);
+    display: block;
+    margin-top: 12px;
+}
+
+.image-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 9px;
+    flex-wrap: wrap;
+}
+
+.composer-wrap {
+    padding: 0 18px 17px;
+    background: linear-gradient(transparent, var(--bg) 12%);
+}
+
+.composer-inner {
+    max-width: 850px;
+    margin: 0 auto;
+}
+
+.composer {
+    border: 1px solid #393b43;
+    background: #15171e;
+    border-radius: 18px;
+    padding: 12px;
+    box-shadow: 0 8px 35px #00000015;
+}
+
+.composer:focus-within {
+    border-color: #9a773b;
+    box-shadow: 0 0 0 2px #e6bb6310;
+}
+
+.composer textarea {
+    width: 100%;
+    resize: none;
+    min-height: 49px;
+    max-height: 180px;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: var(--text);
+    padding: 6px 5px;
+    line-height: 1.6;
+    font-size: 13px;
+}
+
+.composer textarea::placeholder {
+    color: #727887;
+}
+
+.composer-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.composer-tools,
+.composer-send-tools {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    flex-wrap: wrap;
+}
+
+.mode-select {
+    color: #e1c787;
+    background: #26231b;
+    border: 1px solid #5c4b2c;
+    border-radius: 9px;
+    padding: 8px;
+    font-size: 11px;
+}
+
+.tool-btn {
+    color: #aeb3c1;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 9px;
+    padding: 8px 10px;
+    font-size: 11px;
+}
+
+.tool-btn:hover {
+    background: #252833;
+    color: white;
+}
+
+.send-btn {
+    width: 38px;
+    height: 38px;
+    border: 0;
+    border-radius: 11px;
+    background: linear-gradient(135deg, #f7dfa1, #c18a2f);
+    color: #19140a;
+    font-size: 17px;
+    font-weight: 900;
+}
+
+.stop-btn {
+    background: #622f32;
+    color: white;
+}
+
+.attachment-chip {
+    display: none;
+    padding: 7px 9px;
+    margin: 3px 0 8px;
+    border: 1px solid var(--border);
+    background: #20232b;
+    border-radius: 9px;
+    font-size: 11px;
+    color: #d6d9e2;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+}
+
+.attachment-chip.visible {
+    display: flex;
+}
+
+.attachment-chip button {
+    border: 0;
+    background: transparent;
+    color: var(--red);
+}
+
+.disclaimer {
+    text-align: center;
+    font-size: 10px;
+    color: #656a78;
+    padding: 10px 5px 0;
+}
+
+.workspace {
+    width: 420px;
+    min-width: 320px;
+    max-width: 48%;
+    border-left: 1px solid var(--border);
+    background: #0e1015;
+    display: none;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.workspace.visible {
+    display: flex;
+}
+
+.workspace-header {
+    padding: 14px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+}
+
+.workspace-title {
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.workspace-tabs {
+    display: flex;
+    gap: 4px;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+}
+
+.workspace-tab {
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+    padding: 8px 10px;
+    border-radius: 8px;
+    font-size: 11px;
+}
+
+.workspace-tab.active {
+    background: #29251c;
+    color: var(--gold2);
+}
+
+.workspace-pane {
+    display: none;
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+}
+
+.workspace-pane.active {
+    display: flex;
+    flex-direction: column;
+}
+
+.workspace-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 9px;
+    border-bottom: 1px solid var(--border);
+}
+
+.workspace-toolbar select {
+    min-width: 0;
+    flex: 1;
+    background: #1a1d25;
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 8px;
+    font-size: 11px;
+}
+
+.editor {
+    flex: 1;
+    min-height: 250px;
+    width: 100%;
+    border: 0;
+    outline: 0;
+    resize: none;
+    background: #090b10;
+    color: #e6dfcc;
+    padding: 14px;
+    font: 12px/1.8 Consolas, monospace;
+    tab-size: 2;
+}
+
+.preview-frame {
+    width: 100%;
+    height: 100%;
+    min-height: 300px;
+    background: white;
+    border: 0;
+}
+
+.file-list {
+    padding: 10px;
+}
+
+.file-row {
+    padding: 10px;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 7px;
+    font-size: 11px;
+}
+
+.file-row button {
+    border: 0;
+    background: transparent;
+    color: var(--gold2);
+    font-size: 11px;
+}
+
+.output-box {
+    padding: 15px;
+    font: 12px/1.7 Consolas, monospace;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    color: #c9d1df;
+}
+
+.empty-state {
+    padding: 25px 15px;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.7;
+    text-align: center;
+}
+
+.modal-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: #000b;
+    backdrop-filter: blur(8px);
+    z-index: 100;
+    padding: 20px;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-backdrop.visible {
+    display: flex;
+}
+
+.modal {
+    width: min(650px, 100%);
+    max-height: 90dvh;
+    overflow-y: auto;
+    background: #13151c;
+    border: 1px solid #353946;
+    border-radius: 18px;
+    box-shadow: 0 20px 90px #0008;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 20px;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: #13151c;
+    z-index: 2;
+}
+
+.modal-header h2 {
+    font-size: 16px;
+    margin: 0;
+}
+
+.modal-body {
+    padding: 20px;
+}
+
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 11px;
+    color: #b7bbc6;
+    margin-bottom: 8px;
+    font-weight: 700;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+    width: 100%;
+    background: #0c0e13;
+    border: 1px solid #303440;
+    color: var(--text);
+    border-radius: 9px;
+    padding: 11px 12px;
+    outline: 0;
+    font-size: 12px;
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 90px;
+}
+
+.form-group small {
+    display: block;
+    color: var(--muted);
+    font-size: 10px;
+    line-height: 1.6;
+    margin-top: 6px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding-top: 8px;
+}
+
+.setting-section {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 14px;
+}
+
+.setting-section h3 {
+    margin: 0 0 13px;
+    font-size: 12px;
+}
+
+.setting-section p {
+    color: var(--muted);
+    font-size: 11px;
+    line-height: 1.7;
+}
+
+.toast-container {
+    position: fixed;
+    top: 78px;
+    right: 17px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 200;
+    width: min(350px, calc(100% - 34px));
+}
+
+.toast {
+    background: #20232b;
+    border: 1px solid #3b404d;
+    border-radius: 11px;
+    padding: 12px 14px;
+    box-shadow: 0 10px 35px #0005;
+    font-size: 12px;
+    line-height: 1.6;
+    animation: appear .2s ease-out;
+    overflow-wrap: anywhere;
+}
+
+.toast.error {
+    border-color: #874343;
+}
+
+.toast.success {
+    border-color: #376f57;
+}
+
+@keyframes appear {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.typing {
+    color: var(--muted);
+    font-size: 12px;
+    padding: 8px 0;
+}
+
+.typing span {
+    display: inline-block;
+    animation: blink 1s infinite;
+}
+
+.typing span:nth-child(2) { animation-delay: .2s; }
+.typing span:nth-child(3) { animation-delay: .4s; }
+
+@keyframes blink {
+    0%, 60%, 100% { opacity: .25; }
+    30% { opacity: 1; }
+}
+
+.mobile-overlay {
+    display: none;
+}
+
+.hidden {
+    display: none !important;
+}
+
+@media (max-width: 1050px) {
+    .workspace {
+        width: 360px;
+    }
+}
+
+@media (max-width: 800px) {
+    .app {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .sidebar {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        width: 270px;
+        transform: translateX(-105%);
+        transition: transform .2s ease;
+        box-shadow: 20px 0 50px #0005;
+    }
+
+    .sidebar.open {
+        transform: translateX(0);
+    }
+
+    .mobile-overlay.visible {
+        display: block;
+        position: fixed;
+        inset: 0;
+        background: #0009;
+        z-index: 20;
+    }
+
+    .topbar {
+        padding: 0 12px;
+        height: 58px;
+        min-height: 58px;
+    }
+
+    .workspace {
+        position: fixed;
+        inset: 58px 0 0;
+        z-index: 15;
+        width: 100%;
+        max-width: none;
+        border-left: 0;
+    }
+
+    .messages {
+        padding: 20px 12px;
+    }
+
+    .composer-wrap {
+        padding: 0 10px 10px;
+    }
+
+    .welcome {
+        margin-top: 5vh;
+    }
+
+    .suggestions {
+        gap: 8px;
+    }
+
+    .suggestion {
+        padding: 12px;
+    }
+
+    .status-pill {
+        display: none;
+    }
+
+    .topbar-right .secondary-btn {
+        padding: 8px;
+    }
+}
+
+@media (max-width: 430px) {
+    .welcome h1 {
+        font-size: 28px;
+    }
+
+    .welcome p {
+        font-size: 12px;
+    }
+
+    .suggestions {
+        grid-template-columns: 1fr;
+    }
+
+    .message {
+        gap: 8px;
+    }
+
+    .message-avatar {
+        flex-basis: 30px;
+        height: 30px;
+        border-radius: 9px;
+    }
+
+    .message-body {
+        max-width: calc(100% - 38px);
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .composer-bottom {
+        align-items: flex-end;
+    }
+
+    .composer-tools {
+        gap: 2px;
+    }
+
+    .tool-btn {
+        padding: 8px 6px;
+    }
+
+    .top-title {
+        font-size: 12px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+    <aside class="sidebar" id="sidebar">
+        <div class="brand">
+            <div class="brand-logo">M</div>
+            <div>
+                <div class="brand-name">Mora AI</div>
+                <div class="brand-sub">INTELLIGENT WORKSPACE</div>
+            </div>
+        </div>
+
+        <div class="sidebar-content">
+            <button class="primary-btn" id="newChatBtn">
+                <span>＋</span> New conversation
+            </button>
+
+            <div class="nav-section">
+                <div class="nav-heading">Workspace</div>
+
+                <button class="nav-btn active" data-nav="chat">
+                    <span class="nav-icon">◈</span> AI Assistant
+                </button>
+
+                <button class="nav-btn" id="workspaceNav">
+                    <span class="nav-icon">▤</span> Workspace
+                </button>
+
+                <button class="nav-btn" id="projectsNav">
+                    <span class="nav-icon">▣</span> Projects
+                </button>
+
+                <button class="nav-btn" id="historyNav">
+                    <span class="nav-icon">◷</span> History
+                </button>
+
+                <button class="nav-btn" id="galleryNav">
+                    <span class="nav-icon">▧</span> Image gallery
+                </button>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-heading">Recent conversations</div>
+                <div class="side-list" id="conversationList">
+                    <div class="empty-state">Your conversations will appear here.</div>
+                </div>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-heading">Projects</div>
+                <div class="side-list" id="projectList">
+                    <div class="empty-state">Your projects will appear here.</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="sidebar-footer">
+            <button class="nav-btn" id="settingsBtn">
+                <span class="nav-icon">⚙</span> Settings & API
+            </button>
+
+            <div class="account-card">
+                <div class="avatar">M</div>
+                <div>
+                    <div class="account-name">Mora AI</div>
+                    <div class="account-status" id="accountStatus">Ready to assist</div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <div class="mobile-overlay" id="mobileOverlay"></div>
+
+    <main class="main">
+        <header class="topbar">
+            <div class="topbar-left">
+                <button class="icon-btn" id="menuBtn" aria-label="Open menu">☰</button>
+                <div class="top-title" id="topTitle">Mora AI Assistant</div>
+                <div class="status-pill">
+                    <span class="status-dot" id="statusDot"></span>
+                    <span id="connectionLabel">Checking connection</span>
+                </div>
+            </div>
+
+            <div class="topbar-right">
+                <button class="secondary-btn" id="saveProjectBtn">Save project</button>
+                <button class="icon-btn" id="openWorkspaceBtn" title="Toggle workspace">▤</button>
+                <button class="icon-btn" id="topSettingsBtn" title="Settings">⚙</button>
+            </div>
+        </header>
+
+        <div class="content">
+            <section class="chat-area">
+                <div class="messages" id="messages">
+                    <div class="welcome" id="welcome">
+                        <div class="welcome-logo">M</div>
+
+                        <h1>Welcome to <span class="gold-text">Mora AI</span></h1>
+
+                        <p>
+                            Your intelligent workspace for ideas, coding,
+                            problem-solving, content creation, and image generation.
+                            What would you like to accomplish today?
+                        </p>
+
+                        <div class="suggestions">
+                            <button class="suggestion"
+                                    data-prompt="Build a professional responsive website with HTML, CSS, and JavaScript.">
+                                <strong>⌘ Build something</strong>
+                                <span>Create a complete website or application.</span>
+                            </button>
+
+                            <button class="suggestion"
+                                    data-prompt="Help me debug my code. Explain the likely causes and provide a corrected complete solution.">
+                                <strong>⚒ Fix my code</strong>
+                                <span>Debug errors and improve performance.</span>
+                            </button>
+
+                            <button class="suggestion"
+                                    data-prompt="Help me create a detailed, practical project plan with milestones and deliverables.">
+                                <strong>✧ Plan a project</strong>
+                                <span>Turn your idea into actionable steps.</span>
+                            </button>
+
+                            <button class="suggestion"
+                                    data-prompt="Help me write a professional document with a clear structure and polished language.">
+                                <strong>✎ Write something</strong>
+                                <span>Draft, rewrite, or improve content.</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="composer-wrap">
+                    <div class="composer-inner">
+                        <div class="attachment-chip" id="attachmentChip">
+                            <span id="attachmentName">Image attached</span>
+                            <button id="removeAttachmentBtn" type="button">Remove ×</button>
+                        </div>
+
+                        <div class="composer">
+                            <textarea
+                                id="promptInput"
+                                placeholder="Message Mora AI..."
+                                rows="2"
+                                aria-label="Message Mora AI"
+                            ></textarea>
+
+                            <div class="composer-bottom">
+                                <div class="composer-tools">
+                                    <select class="mode-select" id="modeSelect" aria-label="Mode">
+                                        <option value="chat">◈ Chat</option>
+                                        <option value="code">⌘ Code</option>
+                                        <option value="image">▧ Image</option>
+                                    </select>
+
+                                    <button class="tool-btn" id="attachImageBtn">＋ Image</button>
+                                    <button class="tool-btn" id="workspaceBtn">▤ Workspace</button>
+                                    <button class="tool-btn" id="clearBtn">Clear</button>
+                                </div>
+
+                                <div class="composer-send-tools">
+                                    <span style="font-size:10px;color:var(--muted)" id="modelBadge">Auto</span>
+                                    <button class="send-btn" id="sendBtn" aria-label="Send message">↑</button>
+                                    <button class="send-btn stop-btn hidden" id="stopBtn" aria-label="Stop response">■</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="disclaimer">
+                            Mora AI can make mistakes. Verify important information and review generated code.
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <aside class="workspace" id="workspace">
+                <div class="workspace-header">
+                    <div>
+                        <div class="workspace-title">Mora Workspace</div>
+                        <div style="font-size:10px;color:var(--muted);margin-top:4px" id="workspaceSubtitle">
+                            Your generated files and previews
+                        </div>
+                    </div>
+                    <button class="icon-btn" id="closeWorkspaceBtn" title="Close workspace">×</button>
+                </div>
+
+                <div class="workspace-tabs">
+                    <button class="workspace-tab active" data-pane="preview">Preview</button>
+                    <button class="workspace-tab" data-pane="files">Files</button>
+                    <button class="workspace-tab" data-pane="output">Output</button>
+                </div>
+
+                <div class="workspace-pane active" id="pane-preview">
+                    <div class="workspace-toolbar">
+                        <span style="font-size:11px;color:var(--muted)">HTML Preview</span>
+                        <button class="secondary-btn" id="refreshPreviewBtn">Refresh</button>
+                    </div>
+                    <iframe class="preview-frame" id="previewFrame" title="Generated website preview"></iframe>
+                </div>
+
+                <div class="workspace-pane" id="pane-files">
+                    <div class="workspace-toolbar">
+                        <select id="fileSelect" aria-label="Select file">
+                            <option value="">No files yet</option>
+                        </select>
+                        <button class="secondary-btn" id="downloadFileBtn">Download</button>
+                    </div>
+
+                    <textarea class="editor" id="fileEditor"
+                              spellcheck="false"
+                              placeholder="Generated file contents will appear here."></textarea>
+
+                    <div class="workspace-toolbar">
+                        <button class="secondary-btn" id="saveFileBtn">Save changes</button>
+                        <button class="secondary-btn" id="newFileBtn">New file</button>
+                    </div>
+                </div>
+
+                <div class="workspace-pane" id="pane-output">
+                    <div class="workspace-toolbar">
+                        <span style="font-size:11px;color:var(--muted)">Response and execution output</span>
+                        <button class="secondary-btn" id="clearOutputBtn">Clear</button>
+                    </div>
+                    <div class="output-box" id="outputBox">Mora AI output will appear here.</div>
+                </div>
+            </aside>
+        </div>
+    </main>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- SETTINGS -->
+
+<div class="modal-backdrop" id="settingsModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h2>Settings & API Configuration</h2>
+            <button class="icon-btn" data-close="settingsModal">×</button>
+        </div>
+
+        <div class="modal-body">
+            <div class="setting-section">
+                <h3>Server connection</h3>
+
+                <div class="form-group">
+                    <label for="serverUrl">Backend URL</label>
+                    <input id="serverUrl" placeholder="Leave empty to use this website's origin">
+                    <small>
+                        On the same server, leave this empty. For separate frontend
+                        hosting, enter the URL of your Mora AI backend.
+                    </small>
+                </div>
+
+                <div class="form-group">
+                    <label for="authToken">Mora API token</label>
+                    <input id="authToken" type="password"
+                           autocomplete="off"
+                           placeholder="Your MORA_API_TOKEN">
+                    <small>
+                        This is the private server access token, not a provider API key.
+                        Avoid using a shared public browser for sensitive credentials.
+                    </small>
+                </div>
+
+                <button class="secondary-btn" id="testServerBtn">Test backend</button>
+                <span id="serverTestResult" style="font-size:11px;margin-left:8px"></span>
+            </div>
+
+            <div class="setting-section">
+                <h3>Text AI provider</h3>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="textProvider">Provider</label>
+                        <select id="textProvider">
+                            <option value="auto">Auto (server keys)</option>
+                            <option value="gemini">Google Gemini</option>
+                            <option value="groq">Groq</option>
+                            <option value="openrouter">OpenRouter</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="textModel">Model name</label>
+                        <input id="textModel" placeholder="Use provider default">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="textApiKey">Personal provider API key (optional)</label>
+                    <input id="textApiKey" type="password" autocomplete="off"
+                           placeholder="Leave empty to use server configuration">
+                    <small>
+                        A personal key overrides the server key for the selected provider.
+                        Browser-stored keys are not as secure as server-side environment variables.
+                    </small>
+                </div>
+
+                <div class="form-group">
+                    <label for="personalKeyProvider">Provider for your personal key</label>
+                    <select id="personalKeyProvider">
+                        <option value="gemini">Google Gemini</option>
+                        <option value="groq">Groq</option>
+                        <option value="openrouter">OpenRouter</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <input id="fallbackToggle" type="checkbox" checked
+                               style="width:auto;vertical-align:middle">
+                        Allow automatic fallback to another configured server provider
+                    </label>
+                </div>
+            </div>
+
+            <div class="setting-section">
+                <h3>Image generation</h3>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="imageProvider">Image provider</label>
+                        <select id="imageProvider">
+                            <option value="auto">Auto</option>
+                            <option value="gemini">Google Gemini</option>
+                            <option value="openai">OpenAI</option>
+                            <option value="openrouter">OpenRouter</option>
+                            <option value="replicate">Replicate</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="imageModel">Image model</label>
+                        <input id="imageModel" placeholder="Use provider default">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="imageApiKey">Personal image API key (optional)</label>
+                    <input id="imageApiKey" type="password" autocomplete="off"
+                           placeholder="Leave empty to use server keys">
+                    <small>
+                        The key is sent to your backend for the image request.
+                        Prefer server environment variables for production.
+                    </small>
+                </div>
+
+                <div class="form-group">
+                    <label for="imageKeyProvider">Provider for personal image key</label>
+                    <select id="imageKeyProvider">
+                        <option value="gemini">Google Gemini</option>
+                        <option value="openai">OpenAI</option>
+                        <option value="openrouter">OpenRouter</option>
+                        <option value="replicate">Replicate</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="setting-section">
+                <h3>Available services</h3>
+                <div id="providerStatus" style="font-size:12px;color:var(--muted)">
+                    Check the backend to view provider availability.
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button class="secondary-btn" id="resetSettingsBtn">Reset settings</button>
+                <button class="primary-btn" id="saveSettingsBtn" style="width:auto;padding:10px 17px">
+                    Save settings
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- PROJECT DIALOG -->
+
+<div class="modal-backdrop" id="projectModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h2>Save project</h2>
+            <button class="icon-btn" data-close="projectModal">×</button>
+        </div>
+
+        <div class="modal-body">
+            <div class="form-group">
+                <label for="projectTitle">Project title</label>
+                <input id="projectTitle" placeholder="My Mora AI project">
+            </div>
+
+            <div class="form-group">
+                <label for="projectPrompt">Project description</label>
+                <textarea id="projectPrompt" placeholder="Describe this project"></textarea>
+            </div>
+
+            <div class="modal-actions">
+                <button class="secondary-btn" data-close="projectModal">Cancel</button>
+                <button class="primary-btn" id="confirmSaveProject"
+                        style="width:auto;padding:10px 17px">Save project</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- HISTORY DIALOG -->
+
+<div class="modal-backdrop" id="historyModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h2>Recent activity</h2>
+            <button class="icon-btn" data-close="historyModal">×</button>
+        </div>
+
+        <div class="modal-body">
+            <div id="historyContent" class="side-list"></div>
+
+            <div class="modal-actions">
+                <button class="secondary-btn" id="clearHistoryBtn">Clear history</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- GALLERY DIALOG -->
+
+<div class="modal-backdrop" id="galleryModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h2>Image gallery</h2>
+            <button class="icon-btn" data-close="galleryModal">×</button>
+        </div>
+        <div class="modal-body">
+            <div id="galleryContent" class="side-list"></div>
+        </div>
+    </div>
+</div>
+
+<!-- PROJECTS DIALOG -->
+
+<div class="modal-backdrop" id="projectsModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h2>Your projects</h2>
+            <button class="icon-btn" data-close="projectsModal">×</button>
+        </div>
+        <div class="modal-body">
+            <div id="projectsContent" class="side-list"></div>
+        </div>
+    </div>
+</div>
+
+<input type="file" id="imageInput" accept="image/png,image/jpeg,image/webp" hidden>
+<input type="file" id="fileInput" hidden>
+
+<script>
+'use strict';
+
+/* =========================================================
+   MORA AI FRONTEND
+   Compatible with the Mora AI server.js replacement.
+   ========================================================= */
+
+const $ = id => document.getElementById(id);
+
+const STORAGE_KEYS = {
+    serverUrl: 'mora_server_url',
+    token: 'mora_api_token',
+    provider: 'mora_text_provider',
+    model: 'mora_text_model',
+    personalKey: 'mora_personal_key',
+    keyProvider: 'mora_personal_key_provider',
+    fallback: 'mora_fallback',
+    imageProvider: 'mora_image_provider',
+    imageModel: 'mora_image_model',
+    imageKey: 'mora_image_key',
+    imageKeyProvider: 'mora_image_key_provider',
+    draft: 'mora_draft'
+};
+
+const state = {
+    messages: [],
+    conversationId: null,
+    conversationTitle: 'New conversation',
+    projectId: null,
+    projectTitle: '',
+    files: [],
+    selectedFile: '',
+    canvas: null,
+    imageAttachment: null,
+    busy: false,
+    abortController: null,
+    requestId: 0,
+    serverStatus: 'unknown',
+    imageResults: [],
+    output: ''
+};
+
+function readStorage(key, fallback = '') {
+    try {
+        const value = localStorage.getItem(key);
+        return value === null ? fallback : value;
+    } catch {
+        return fallback;
+    }
+}
+
+function writeStorage(key, value) {
+    try {
+        localStorage.setItem(key, value);
+    } catch {
+        toast('Unable to save settings in this browser.', 'error');
+    }
+}
+
+function removeStorage(key) {
+    try {
+        localStorage.removeItem(key);
+    } catch {}
+}
+
+function baseUrl() {
+    return $('serverUrl').value.trim().replace(/\/+$/, '');
+}
+
+function endpoint(path) {
+    return `${baseUrl()}${path}`;
+}
+
+function requestHeaders(extra = {}) {
+    const headers = { ...extra };
+    const token = $('authToken').value.trim();
+
+    if (token) {
+        headers.Authorization = `Bearer ${token}`;
+    }
+
+    return headers;
+}
+
+async function api(path, options = {}) {
+    const headers = requestHeaders(options.headers || {});
+    const config = { ...options, headers };
+
+    if (config.body && typeof config.body !== 'string') {
+        headers['Content-Type'] = 'application/json';
+        config.body = JSON.stringify(config.body);
+    }
+
+    let response;
+
+    try {
+        response = await fetch(endpoint(path), config);
+    } catch (error) {
+        throw new Error(
+            `Cannot reach the Mora AI backend. Check the server URL and make sure server.js is running. ${error.message || ''}`
+        );
+    }
+
+    const contentType = response.headers.get('content-type') || '';
+
+    let data;
+
+    if (contentType.includes('application/json')) {
+        data = await response.json().catch(() => ({}));
+    } else {
+        data = await response.text().catch(() => '');
+    }
+
+    if (!response.ok) {
+        const message = typeof data === 'object'
+            ? data.error || data.message
+            : data;
+
+        throw new Error(
+            message || `Request failed with HTTP ${response.status}.`
+        );
+    }
+
+    return data;
+}
+
+function toast(message, type = '') {
+    const node = document.createElement('div');
+    node.className = `toast ${type}`;
+    node.textContent = String(message);
+
+    $('toastContainer').appendChild(node);
+
+    setTimeout(() => node.remove(), 5500);
+}
+
+function escapeHtml(value) {
+    return String(value ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+}
+
+function makeId() {
+    return crypto.randomUUID
+        ? crypto.randomUUID()
+        : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
+/* ---------------------------- SIMPLE MARKDOWN ---------------------------- */
+
+function safeLink(url) {
+    try {
+        const parsed = new URL(url);
+
+        if (['https:', 'http:', 'mailto:'].includes(parsed.protocol)) {
+            return parsed.href;
+        }
+    } catch {}
+
+    return '';
+}
+
+function inlineMarkdown(text) {
+    let value = escapeHtml(text);
+
+    value = value.replace(
+        /\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g,
+        (_, label, url) => {
+            const link = safeLink(url);
+            return link
+                ? `<a href="${escapeHtml(link)}" target="_blank" rel="noopener noreferrer">${label}</a>`
+                : label;
+        }
+    );
+
+    value = value.replace(
+        /`([^`\n]+)`/g,
+        '<code>$1</code>'
+    );
+
+    value = value.replace(
+        /\*\*(.+?)\*\*/g,
+        '<strong>$1</strong>'
+    );
+
+    value = value.replace(
+        /(^|[^*])\*([^*\n]+)\*/g,
+        '$1<em>$2</em>'
+    );
+
+    return value;
+}
+
+function renderMarkdown(source) {
+    const text = String(source ?? '');
+    const codeBlocks = [];
+
+    let safe = text.replace(
+        /```([a-zA-Z0-9_+#.-]*)\n?([\s\S]*?)```/g,
+        (_match, language, code) => {
+            const index = codeBlocks.length;
+
+            codeBlocks.push({
+                language: language || 'code',
+                code
+            });
+
+            return `\n%%MORA_CODE_${index}%%\n`;
+        }
+    );
+
+    const lines = safe.split(/\r?\n/);
+    const html = [];
+    let inList = false;
+    let listType = '';
+    let inQuote = false;
+
+    function closeList() {
+        if (inList) {
+            html.push(listType === 'ol' ? '</ol>' : '</ul>');
+            inList = false;
+            listType = '';
+        }
+    }
+
+    function closeQuote() {
+        if (inQuote) {
+            html.push('</blockquote>');
+            inQuote = false;
+        }
+    }
+
+    for (const rawLine of lines) {
+        const line = rawLine.trim();
+
+        const codeMatch = line.match(/^%%MORA_CODE_(\d+)%%$/);
+
+        if (codeMatch) {
+            closeList();
+            closeQuote();
+
+            const block = codeBlocks[Number(codeMatch[1])];
+
+            html.push(`
+                <div class="code-block">
+                    <div class="code-head">
+                        <span>${escapeHtml(block.language)}</span>
+                        <button type="button"
+                            data-copy-code="${codeMatch[1]}">Copy code</button>
+                    </div>
+                    <pre><code>${escapeHtml(block.code)}</code></pre>
+                </div>
+            `);
+
+            continue;
+        }
+
+        if (!line) {
+            closeList();
+            closeQuote();
+            continue;
+        }
+
+        const heading = line.match(/^(#{1,3})\s+(.+)$/);
+
+        if (heading) {
+            closeList();
+            closeQuote();
+
+            const level = heading[1].length;
+
+            html.push(
+                `<h${level}>${inlineMarkdown(heading[2])}</h${level}>`
+            );
+
+            continue;
+        }
+
+        if (line.startsWith('> ')) {
+            closeList();
+
+            if (!inQuote) {
+                html.push('<blockquote>');
+                inQuote = true;
+            }
+
+            html.push(`<p>${inlineMarkdown(line.slice(2))}</p>`);
+            continue;
+        }
+
+        closeQuote();
+
+        const unordered = line.match(/^[-*+]\s+(.+)$/);
+        const ordered = line.match(/^\d+[.)]\s+(.+)$/);
+
+        if (unordered || ordered) {
+            const wantedType = ordered ? 'ol' : 'ul';
+
+            if (!inList || listType !== wantedType) {
+                closeList();
+                listType = wantedType;
+                inList = true;
+                html.push(`<${listType}>`);
+            }
+
+            const item = ordered ? ordered[1] : unordered[1];
+
+            html.push(`<li>${inlineMarkdown(item)}</li>`);
+            continue;
+        }
+
+        closeList();
+        html.push(`<p>${inlineMarkdown(line)}</p>`);
+    }
+
+    closeList();
+    closeQuote();
+
+    let output = html.join('\n');
+
+    output = output.replace(
+        /%%MORA_CODE_(\d+)%%/g,
+        (_match, index) => {
+            const block = codeBlocks[Number(index)];
+
+            return block
+                ? `<pre><code>${escapeHtml(block.code)}</code></pre>`
+                : '';
+        }
+    );
+
+    return output;
+}
+
+function getMessageText(message) {
+    if (typeof message.content === 'string') return message.content;
+    if (typeof message.text === 'string') return message.text;
+    if (typeof message.message === 'string') return message.message;
+    return '';
+}
+
+/* ---------------------------- CHAT RENDERING ---------------------------- */
+
+function hideWelcome() {
+    const welcome = $('welcome');
+    if (welcome) welcome.remove();
+}
+
+function scrollMessages() {
+    $('messages').scrollTop = $('messages').scrollHeight;
+}
+
+function renderMessage(message, index) {
+    const role = message.role === 'user' ? 'user' : 'assistant';
+    const text = getMessageText(message);
+
+    const wrapper = document.createElement('article');
+    wrapper.className = `message ${role}`;
+    wrapper.dataset.messageId = message.id || String(index);
+
+    const avatar = document.createElement('div');
+    avatar.className = 'message-avatar';
+    avatar.textContent = role === 'user' ? 'Y' : 'M';
+
+    const body = document.createElement('div');
+    body.className = 'message-body';
+
+    const label = document.createElement('div');
+    label.className = 'message-label';
+    label.textContent = role === 'user' ? 'You' : 'Mora AI';
+
+    const textNode = document.createElement('div');
+    textNode.className = 'message-text';
+
+    if (role === 'user') {
+        textNode.textContent = text;
+    } else {
+        textNode.innerHTML = renderMarkdown(text);
+    }
+
+    body.append(label, textNode);
+
+    const images = Array.isArray(message.images)
+        ? message.images
+        : [];
+
+    images.forEach(image => {
+        if (!image || typeof image.url !== 'string') return;
+
+        const imageUrl = safeImageUrl(image.url);
+        if (!imageUrl) return;
+
+        const img = document.createElement('img');
+        img.className = 'message-image';
+        img.src = imageUrl;
+        img.alt = image.alt || image.prompt || 'Generated image';
+        img.loading = 'lazy';
+
+        body.appendChild(img);
+
+        const actions = document.createElement('div');
+        actions.className = 'image-actions';
+
+        const download = document.createElement('button');
+        download.className = 'secondary-btn';
+        download.textContent = 'Download image';
+
+        download.addEventListener('click', () => {
+            downloadUrl(imageUrl, image.name || 'mora-image.png');
+        });
+
+        actions.appendChild(download);
+        body.appendChild(actions);
+    });
+
+    if (role === 'assistant') {
+        const actions = document.createElement('div');
+        actions.className = 'message-actions';
+
+        const copy = document.createElement('button');
+        copy.textContent = 'Copy response';
+
+        copy.addEventListener('click', async () => {
+            await copyText(text);
+        });
+
+        const save = document.createElement('button');
+        save.textContent = 'Save conversation';
+
+        save.addEventListener('click', () => saveConversation(true));
+
+        actions.append(copy, save);
+        body.appendChild(actions);
+    }
+
+    wrapper.append(avatar, body);
+    $('messages').appendChild(wrapper);
+
+    return wrapper;
+}
+
+function renderAllMessages() {
+    $('messages').innerHTML = '';
+
+    state.messages.forEach((message, index) => {
+        renderMessage(message, index);
+    });
+
+    scrollMessages();
+}
+
+function addMessage(role, content, images = []) {
+    hideWelcome();
+
+    const message = {
+        id: makeId(),
+        role,
+        content: String(content ?? ''),
+        images: Array.isArray(images) ? images : [],
+        createdAt: new Date().toISOString()
+    };
+
+    state.messages.push(message);
+    renderMessage(message, state.messages.length - 1);
+    scrollMessages();
+
+    return message;
+}
+
+function showTyping() {
+    hideWelcome();
+
+    const wrapper = document.createElement('div');
+    wrapper.className = 'message assistant';
+    wrapper.id = 'typingIndicator';
+
+    wrapper.innerHTML = `
+        <div class="message-avatar">M</div>
+        <div class="message-body">
+            <div class="message-label">Mora AI is thinking</div>
+            <div class="typing">Working<span>.</span><span>.</span><span>.</span></div>
+        </div>
+    `;
+
+    $('messages').appendChild(wrapper);
+    scrollMessages();
+}
+
+function hideTyping() {
+    $('typingIndicator')?.remove();
+}
+
+async function copyText(text) {
+    try {
+        await navigator.clipboard.writeText(String(text));
+        toast('Copied to clipboard.', 'success');
+    } catch {
+        const textarea = document.createElement('textarea');
+        textarea.value = String(text);
+        document.body.appendChild(textarea);
+        textarea.select();
+
+        try {
+            document.execCommand('copy');
+            toast('Copied to clipboard.', 'success');
+        } catch {
+            toast('Unable to copy automatically.', 'error');
+        }
+
+        textarea.remove();
+    }
+}
+
+/* ---------------------------- WORKSPACE ---------------------------- */
+
+function openWorkspace(pane = 'preview') {
+    $('workspace').classList.add('visible');
+    setWorkspacePane(pane);
+}
+
+function closeWorkspace() {
+    $('workspace').classList.remove('visible');
+}
+
+function setWorkspacePane(name) {
+    document.querySelectorAll('.workspace-tab').forEach(button => {
+        button.classList.toggle('active', button.dataset.pane === name);
+    });
+
+    document.querySelectorAll('.workspace-pane').forEach(pane => {
+        pane.classList.toggle('active', pane.id === `pane-${name}`);
+    });
+}
+
+function renderFiles() {
+    const select = $('fileSelect');
+    const current = state.selectedFile;
+
+    select.innerHTML = '';
+
+    if (!state.files.length) {
+        select.add(new Option('No files yet', ''));
+        state.selectedFile = '';
+        $('fileEditor').value = '';
+        return;
+    }
+
+    state.files.forEach((file, index) => {
+        const option = new Option(file.name, file.name);
+        select.add(option);
+    });
+
+    const selected = state.files.find(file => file.name === current)
+        || state.files[0];
+
+    state.selectedFile = selected.name;
+    select.value = selected.name;
+    $('fileEditor').value = selected.content;
+}
+
+function addOrUpdateFile(file) {
+    const name = String(file.name || file.path || 'untitled.txt')
+        .replaceAll('\\', '/')
+        .split('/')
+        .pop()
+        .replace(/[^a-zA-Z0-9._ -]/g, '_');
+
+    if (!name) return;
+
+    const content = String(file.content ?? '');
+
+    const existing = state.files.find(item => item.name === name);
+
+    if (existing) {
+        existing.content = content;
+        existing.path = file.path || name;
+    } else {
+        state.files.push({
+            name,
+            path: file.path || name,
+            content
+        });
+    }
+
+    state.selectedFile = name;
+}
+
+function getHtmlForPreview() {
+    if (state.canvas && typeof state.canvas.html === 'string') {
+        return state.canvas.html;
+    }
+
+    const htmlFile = state.files.find(file =>
+        file.name.toLowerCase() === 'index.html' ||
+        file.name.toLowerCase().endsWith('.html')
+    );
+
+    if (htmlFile) return htmlFile.content;
+
+    return `<!doctype html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mora Preview</title></head>
+<body style="font-family:Arial,sans-serif;padding:35px">
+<h2>Mora AI Workspace</h2>
+<p>Ask Mora AI to create a website or HTML file to preview it here.</p>
+</body>
+</html>`;
+}
+
+function refreshPreview() {
+    const html = getHtmlForPreview();
+    const frame = $('previewFrame');
+
+    frame.srcdoc = html;
+    state.canvas = state.canvas || { type: 'html', html };
+
+    $('workspaceSubtitle').textContent =
+        state.files.length
+            ? `${state.files.length} file(s) available`
+            : 'Preview and edit generated files';
+
+    toast('Preview refreshed.', 'success');
+}
+
+function updateWorkspaceFromResult(data) {
+    if (Array.isArray(data.files)) {
+        data.files.forEach(addOrUpdateFile);
+    }
+
+    if (data.canvas) {
+        if (typeof data.canvas === 'string') {
+            state.canvas = { type: 'html', html: data.canvas };
+        } else {
+            state.canvas = data.canvas;
+        }
+    }
+
+    if (typeof data.terminal === 'string' && data.terminal) {
+        state.output += `${state.output ? '\n\n' : ''}${data.terminal}`;
+    }
+
+    if (data.execution) {
+        state.output += `${state.output ? '\n\n' : ''}${JSON.stringify(data.execution, null, 2)}`;
+    }
+
+    renderFiles();
+    $('outputBox').textContent = state.output || 'No execution output yet.';
+
+    if (state.files.length || state.canvas) {
+        openWorkspace(state.canvas ? 'preview' : 'files');
+        refreshPreview();
+    }
+}
+
+function saveEditorChanges() {
+    const file = state.files.find(item => item.name === state.selectedFile);
+
+    if (!file) {
+        toast('Select or create a file first.', 'error');
+        return;
+    }
+
+    file.content = $('fileEditor').value;
+
+    if (file.name.toLowerCase().endsWith('.html')) {
+        state.canvas = { type: 'html', html: file.content };
+    }
+
+    $('outputBox').textContent = `Saved changes to ${file.name}.`;
+
+    toast(`${file.name} updated.`, 'success');
+}
+
+function downloadBlob(content, filename, type = 'text/plain;charset=utf-8') {
+    const blob = new Blob([content], { type });
+    const url = URL.createObjectURL(blob);
+
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = filename;
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+
+    setTimeout(() => URL.revokeObjectURL(url), 1500);
+}
+
+function downloadUrl(url, filename) {
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = filename;
+    anchor.target = '_blank';
+    anchor.rel = 'noopener noreferrer';
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+}
+
+/* ---------------------------- API SETTINGS ---------------------------- */
+
+function loadSettings() {
+    $('serverUrl').value = readStorage(STORAGE_KEYS.serverUrl);
+    $('authToken').value = readStorage(STORAGE_KEYS.token);
+    $('textProvider').value = readStorage(STORAGE_KEYS.provider, 'auto');
+    $('textModel').value = readStorage(STORAGE_KEYS.model);
+    $('textApiKey').value = readStorage(STORAGE_KEYS.personalKey);
+    $('personalKeyProvider').value =
+        readStorage(STORAGE_KEYS.keyProvider, 'gemini');
+
+    $('fallbackToggle').checked =
+        readStorage(STORAGE_KEYS.fallback, 'true') !== 'false';
+
+    $('imageProvider').value =
+        readStorage(STORAGE_KEYS.imageProvider, 'auto');
+
+    $('imageModel').value = readStorage(STORAGE_KEYS.imageModel);
+    $('imageApiKey').value = readStorage(STORAGE_KEYS.imageKey);
+
+    $('imageKeyProvider').value =
+        readStorage(STORAGE_KEYS.imageKeyProvider, 'gemini');
+
+    $('promptInput').value = readStorage(STORAGE_KEYS.draft);
+    updateModelBadge();
+}
+
+function saveSettings() {
+    writeStorage(STORAGE_KEYS.serverUrl, $('serverUrl').value.trim());
+    writeStorage(STORAGE_KEYS.token, $('authToken').value.trim());
+    writeStorage(STORAGE_KEYS.provider, $('textProvider').value);
+    writeStorage(STORAGE_KEYS.model, $('textModel').value.trim());
+    writeStorage(STORAGE_KEYS.personalKey, $('textApiKey').value.trim());
+
+    writeStorage(
+        STORAGE_KEYS.keyProvider,
+        $('personalKeyProvider').value
+    );
+
+    writeStorage(
+        STORAGE_KEYS.fallback,
+        String($('fallbackToggle').checked)
+    );
+
+    writeStorage(STORAGE_KEYS.imageProvider, $('imageProvider').value);
+    writeStorage(STORAGE_KEYS.imageModel, $('imageModel').value.trim());
+    writeStorage(STORAGE_KEYS.imageKey, $('imageApiKey').value.trim());
+
+    writeStorage(
+        STORAGE_KEYS.imageKeyProvider,
+        $('imageKeyProvider').value
+    );
+
+    updateModelBadge();
+    closeModal('settingsModal');
+
+    toast('Settings saved.', 'success');
+
+    checkServer();
+}
+
+function updateModelBadge() {
+    const provider = $('textProvider').value;
+    const model = $('textModel').value.trim();
+
+    $('modelBadge').textContent = model || (
+        provider === 'auto'
+            ? 'Auto'
+            : provider.charAt(0).toUpperCase() + provider.slice(1)
+    );
+}
+
+function openModal(id) {
+    $(id).classList.add('visible');
+}
+
+function closeModal(id) {
+    $(id).classList.remove('visible');
+}
+
+function providerDisplayName(name) {
+    const labels = {
+        gemini: 'Google Gemini',
+        groq: 'Groq',
+        openrouter: 'OpenRouter',
+        openai: 'OpenAI',
+        replicate: 'Replicate'
+    };
+
+    return labels[name] || name;
+}
+
+async function checkServer() {
+    $('connectionLabel').textContent = 'Checking connection';
+    $('statusDot').style.background = '#e6bb63';
+
+    try {
+        const data = await api('/api/health');
+
+        state.serverStatus = 'online';
+        $('connectionLabel').textContent = 'Backend online';
+        $('statusDot').style.background = '#68dba2';
+        $('accountStatus').textContent = 'Backend connected';
+
+        const textProviders = Array.isArray(data.providers)
+            ? data.providers
+            : [];
+
+        const imageProviders = Array.isArray(data.imageProviders)
+            ? data.imageProviders
+            : [];
+
+        const lines = [];
+
+        lines.push('<strong style="color:#f2f2f5">Text providers</strong>');
+
+        if (textProviders.length) {
+            textProviders.forEach(provider => {
+                lines.push(
+                    `<div style="margin-top:8px">${escapeHtml(providerDisplayName(provider.name))}: ` +
+                    `<span style="color:${provider.configured ? 'var(--green)' : 'var(--muted)'}">` +
+                    `${provider.configured ? 'Configured' : 'Not configured'}</span></div>`
+                );
+            });
+        } else {
+            lines.push('<div>No provider details returned.</div>');
+        }
+
+        lines.push('<br><strong style="color:#f2f2f5">Image providers</strong>');
+
+        imageProviders.forEach(provider => {
+            lines.push(
+                `<div style="margin-top:8px">${escapeHtml(providerDisplayName(provider.name))}: ` +
+                `<span style="color:${provider.configured ? 'var(--green)' : 'var(--muted)'}">` +
+                `${provider.configured ? 'Configured' : 'Not configured'}</span></div>`
+            );
+        });
+
+        lines.push(
+            `<div style="margin-top:10px">Python execution: ` +
+            `<span style="color:${data.e2bConfigured ? 'var(--green)' : 'var(--muted)'}">` +
+            `${data.e2bConfigured ? 'Configured' : 'Not configured'}</span></div>`
+        );
+
+        $('providerStatus').innerHTML = lines.join('');
+
+        return data;
+    } catch (error) {
+        state.serverStatus = 'offline';
+        $('connectionLabel').textContent = 'Backend unavailable';
+        $('statusDot').style.background = '#ff7474';
+        $('accountStatus').textContent = 'Connection needs attention';
+
+        $('providerStatus').textContent = error.message;
+
+        return null;
+    }
+}
+
+async function testServer() {
+    $('serverTestResult').textContent = 'Testing...';
+
+    try {
+        const health = await api('/api/health');
+
+        $('serverTestResult').textContent = 'Connected';
+        $('serverTestResult').style.color = 'var(--green)';
+
+        toast(
+            `Backend is online. ${health.providers?.filter(p => p.configured).length || 0} text provider(s) configured.`,
+            'success'
+        );
+
+        $('providerStatus').innerHTML = '';
+
+        await checkServer();
+    } catch (error) {
+        $('serverTestResult').textContent = 'Failed';
+        $('serverTestResult').style.color = 'var(--red)';
+
+        toast(error.message, 'error');
+    }
+}
+
+/* ---------------------------- CONVERSATION STORAGE ---------------------------- */
+
+function persistentMessages() {
+    return state.messages.map(message => ({
+        id: message.id || makeId(),
+        role: message.role === 'assistant' ? 'assistant' : 'user',
+        content: String(message.content || ''),
+        images: Array.isArray(message.images) ? message.images : [],
+        createdAt: message.createdAt || new Date().toISOString()
+    }));
+}
+
+function deriveTitle() {
+    const first = state.messages.find(message => message.role === 'user');
+
+    if (!first) return 'New conversation';
+
+    const text = getMessageText(first).replace(/\s+/g, ' ').trim();
+
+    return text.slice(0, 65) || 'New conversation';
+}
+
+async function saveConversation(showToast = false) {
+    if (!state.messages.length) {
+        if (showToast) toast('There is no conversation to save.', 'error');
+        return false;
+    }
+
+    try {
+        const result = await api('/api/conversations', {
+            method: 'POST',
+            body: {
+                id: state.conversationId || undefined,
+                title: state.conversationTitle === 'New conversation'
+                    ? deriveTitle()
+                    : state.conversationTitle,
+                messages: persistentMessages()
+            }
+        });
+
+        const conversation = result.conversation;
+
+        if (conversation?.id) {
+            state.conversationId = conversation.id;
+            state.conversationTitle = conversation.title || deriveTitle();
+        }
+
+        await refreshConversations();
+
+        if (showToast) {
+            toast('Conversation saved.', 'success');
+        }
+
+        return true;
+    } catch (error) {
+        console.error('Conversation save failed:', error);
+
+        if (showToast) {
+            toast(`Could not save conversation: ${error.message}`, 'error');
+        }
+
+        return false;
+    }
+}
+
+async function refreshConversations() {
+    try {
+        const result = await api('/api/conversations');
+        const conversations = result.conversations || [];
+
+        const list = $('conversationList');
+        list.innerHTML = '';
+
+        if (!conversations.length) {
+            list.innerHTML =
+                '<div class="empty-state">No saved conversations yet.</div>';
+            return;
+        }
+
+        conversations.slice(0, 12).forEach(conversation => {
+            const row = document.createElement('button');
+            row.className = 'side-item';
+            row.textContent = conversation.title || 'Untitled conversation';
+            row.title = row.textContent;
+
+            row.addEventListener('click', () => {
+                loadConversation(conversation.id);
+                closeSidebar();
+            });
+
+            list.appendChild(row);
+        });
+    } catch (error) {
+        console.warn('Unable to load conversations:', error.message);
+    }
+}
+
+async function loadConversation(id) {
+    try {
+        const result = await api(
+            `/api/conversations/${encodeURIComponent(id)}`
+        );
+
+        const conversation = result.conversation;
+
+        if (!conversation) {
+            throw new Error('The server did not return the conversation.');
+        }
+
+        state.conversationId = conversation.id;
+        state.conversationTitle = conversation.title || 'Conversation';
+        state.messages = Array.isArray(conversation.messages)
+            ? conversation.messages
+            : [];
+
+        state.projectId = null;
+
+        renderAllMessages();
+        updateTopTitle();
+        closeModal('historyModal');
+        closeModal('galleryModal');
+        closeModal('projectsModal');
+
+        toast('Conversation loaded.', 'success');
+    } catch (error) {
+        toast(`Unable to load conversation: ${error.message}`, 'error');
+    }
+}
+
+function updateTopTitle() {
+    $('topTitle').textContent = state.conversationId
+        ? state.conversationTitle
+        : 'Mora AI Assistant';
+}
+
+function newConversation() {
+    state.requestId++;
+
+    if (state.abortController) {
+        state.abortController.abort();
+    }
+
+    state.abortController = null;
+    state.busy = false;
+    state.messages = [];
+    state.conversationId = null;
+    state.conversationTitle = 'New conversation';
+    state.projectId = null;
+    state.projectTitle = '';
+    state.files = [];
+    state.selectedFile = '';
+    state.canvas = null;
+    state.output = '';
+    state.imageAttachment = null;
+
+    $('messages').innerHTML = $('welcome').outerHTML;
+    $('fileEditor').value = '';
+    $('outputBox').textContent = 'Mora AI output will appear here.';
+    $('previewFrame').srcdoc = '';
+    $('promptInput').value = '';
+
+    writeStorage(STORAGE_KEYS.draft, '');
+
+    updateAttachmentChip();
+    renderFiles();
+    updateTopTitle();
+    updateBusyUI(false);
+    closeWorkspace();
+
+    document.querySelectorAll('.suggestion').forEach(button => {
+        button.addEventListener('click', () => {
+            $('promptInput').value = button.dataset.prompt || '';
+            $('promptInput').focus();
+            autoResizePrompt();
+        });
+    });
+}
+
+/* ---------------------------- CHAT REQUESTS ---------------------------- */
+
+function buildProviderPayload() {
+    const provider = $('textProvider').value;
+    const personalKey = $('textApiKey').value.trim();
+
+    return {
+        provider,
+        providerForKey: $('personalKeyProvider').value,
+        apiKey: personalKey,
+        model: $('textModel').value.trim(),
+        fallback: $('fallbackToggle').checked
+    };
+}
+
+function conversationContext() {
+    // The current prompt is not included yet, so the backend appends it once.
+    return state.messages.slice(-12).map(message => ({
+        role: message.role,
+        content: getMessageText(message)
+    }));
+}
+
+function updateBusyUI(busy) {
+    state.busy = busy;
+
+    $('sendBtn').classList.toggle('hidden', busy);
+    $('stopBtn').classList.toggle('hidden', !busy);
+
+    $('promptInput').disabled = false;
+
+    $('accountStatus').textContent = busy
+        ? 'Generating response...'
+        : 'Ready to assist';
+}
+
+function setOutput(text) {
+    state.output = String(text || '');
+    $('outputBox').textContent = state.output || 'No output yet.';
+}
+
+function extractApiError(data) {
+    if (!data) return 'The server returned an empty response.';
+    if (typeof data.error === 'string') return data.error;
+    if (typeof data.message === 'string') return data.message;
+    return 'The AI provider returned an unexpected response.';
+}
+
+async function runChat() {
+    if (state.busy) return;
+
+    const prompt = $('promptInput').value.trim();
+
+    if (!prompt && !state.imageAttachment) {
+        toast('Enter a message first.', 'error');
+        return;
+    }
+
+    const mode = $('modeSelect').value;
+
+    if (mode === 'image') {
+        if (!prompt) {
+            toast('Describe the image you want to generate.', 'error');
+            return;
+        }
+
+        await generateImage(prompt);
+        return;
+    }
+
+    if (state.imageAttachment) {
+        toast(
+            'An image is attached. Image understanding depends on the selected provider. Your message will include the image attachment.',
+            ''
+        );
+    }
+
+    const userContent = prompt || 'Please analyze the attached image.';
+
+    addMessage('user', userContent);
+
+    $('promptInput').value = '';
+    writeStorage(STORAGE_KEYS.draft, '');
+    autoResizePrompt();
+
+    const requestId = ++state.requestId;
+    const controller = new AbortController();
+
+    state.abortController = controller;
+
+    updateBusyUI(true);
+    showTyping();
+
+    try {
+        const payload = {
+            prompt: mode === 'code'
+                ? `You are in Code mode. Provide a complete, working solution with file names, code, and explanations where useful.\n\n${userContent}`
+                : userContent,
+            mode,
+            messages: conversationContext(),
+            ...buildProviderPayload()
+        };
+
+        // If the user attached an image, include it in the request.
+        // The backend's text endpoint may not support image input; the image
+        // is included only as metadata unless the provider supports it.
+        if (state.imageAttachment) {
+            payload.attachment = {
+                name: state.imageAttachment.name,
+                mimeType: state.imageAttachment.mimeType,
+                data: state.imageAttachment.data
+            };
+        }
+
+        const data = await api('/api/agent', {
+            method: 'POST',
+            body: payload,
+            signal: controller.signal
+        });
+
+        if (requestId !== state.requestId) return;
+
+        const answer = String(data.message || '').trim();
+
+        if (!answer && !(data.files?.length) && !data.canvas) {
+            throw new Error(
+                'The AI provider returned an empty answer. Check the selected provider, model, and API key.'
+            );
+        }
+
+        const message = answer ||
+            'Your files or preview have been generated. Open the workspace to review them.';
+
+        addMessage('assistant', message);
+
+        updateWorkspaceFromResult(data);
+
+        setOutput([
+            `Provider: ${data.provider || 'Unknown'}`,
+            `Model: ${data.model || 'Default'}`,
+            '',
+            message,
+            data.terminal ? `\n${data.terminal}` : ''
+        ].join('\n'));
+
+        if (!state.conversationId) {
+            state.conversationTitle = deriveTitle();
+        }
+
+        updateTopTitle();
+
+        // Persist only after the assistant answer has been added.
+        await saveConversation(false);
+    } catch (error) {
+        if (error.name === 'AbortError') {
+            addMessage('assistant', 'Generation stopped.');
+        } else {
+            console.error('Mora AI request failed:', error);
+
+            addMessage(
+                'assistant',
+                `I couldn't complete that request.\n\n**Error:** ${error.message}\n\nCheck Settings to confirm that your backend URL, token, provider, and model are correct.`
+            );
+
+            toast(error.message, 'error');
+        }
+    } finally {
+        if (requestId === state.requestId) {
+            hideTyping();
+            updateBusyUI(false);
+            state.abortController = null;
+            state.imageAttachment = null;
+            updateAttachmentChip();
+        }
+    }
+}
+
+function stopGeneration() {
+    if (!state.busy) return;
+
+    state.requestId++;
+
+    if (state.abortController) {
+        state.abortController.abort();
+    }
+
+    state.abortController = null;
+    hideTyping();
+    updateBusyUI(false);
+
+    toast('Stopped waiting for the response.', '');
+}
+
+/* ---------------------------- IMAGE GENERATION ---------------------------- */
+
+function safeImageUrl(url) {
+    const value = String(url || '');
+
+    if (value.startsWith('/generated-images/')) {
+        return endpoint(value);
+    }
+
+    try {
+        const parsed = new URL(value, window.location.href);
+
+        if (
+            parsed.protocol === 'https:' ||
+            parsed.origin === window.location.origin
+        ) {
+            return parsed.href;
+        }
+    } catch {}
+
+    return '';
+}
+
+async function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+
+        reader.onload = () => {
+            const result = String(reader.result || '');
+            const comma = result.indexOf(',');
+
+            if (comma < 0) {
+                reject(new Error('Could not read the image file.'));
+                return;
+            }
+
+            resolve(result.slice(comma + 1));
+        };
+
+        reader.onerror = () => reject(
+            new Error('Could not read the selected image.')
+        );
+
+        reader.readAsDataURL(file);
+    });
+}
+
+function updateAttachmentChip() {
+    const chip = $('attachmentChip');
+
+    if (!state.imageAttachment) {
+        chip.classList.remove('visible');
+        $('attachmentName').textContent = '';
+        return;
+    }
+
+    chip.classList.add('visible');
+    $('attachmentName').textContent = state.imageAttachment.name;
+}
+
+async function handleImageSelected(file) {
+    if (!file) return;
+
+    if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type)) {
+        toast('Select a PNG, JPEG, or WebP image.', 'error');
+        return;
+    }
+
+    if (file.size > 6 * 1024 * 1024) {
+        toast('Image size must be 6 MB or less.', 'error');
+        return;
+    }
+
+    try {
+        const data = await fileToBase64(file);
+
+        state.imageAttachment = {
+            name: file.name,
+            mimeType: file.type,
+            data
+        };
+
+        updateAttachmentChip();
+
+        toast(`Attached ${file.name}.`, 'success');
+    } catch (error) {
+        toast(error.message, 'error');
+    }
+}
+
+function buildImagePayload(prompt) {
+    const provider = $('imageProvider').value;
+    const key = $('imageApiKey').value.trim();
+    const keyProvider = $('imageKeyProvider').value;
+
+    const imageKeys = {};
+
+    if (key) {
+        imageKeys[keyProvider] = key;
+    }
+
+    return {
+        prompt,
+        provider,
+        imageKeys,
+        models: $('imageModel').value.trim()
+            ? { [provider === 'auto' ? keyProvider : provider]: $('imageModel').value.trim() }
+            : {},
+        inputImage: state.imageAttachment
+            ? {
+                name: state.imageAttachment.name,
+                mimeType: state.imageAttachment.mimeType,
+                data: state.imageAttachment.data
+            }
+            : null
+    };
+}
+
+async function generateImage(prompt) {
+    if (state.busy) return;
+
+    addMessage('user', prompt);
+
+    $('promptInput').value = '';
+    writeStorage(STORAGE_KEYS.draft, '');
+    autoResizePrompt();
+
+    const requestId = ++state.requestId;
+    const controller = new AbortController();
+
+    state.abortController = controller;
+    updateBusyUI(true);
+    showTyping();
+
+    try {
+        const payload = buildImagePayload(prompt);
+
+        const data = await api('/api/images/generate', {
+            method: 'POST',
+            body: payload,
+            signal: controller.signal
+        });
+
+        if (requestId !== state.requestId) return;
+
+        if (!data.success) {
+            throw new Error(extractApiError(data));
+        }
+
+        // The backend returns image as an object with a URL.
+        const image = typeof data.image === 'string'
+            ? { url: data.image }
+            : data.image || { url: data.url };
+
+        if (!image.url) {
+            throw new Error('The provider returned no image URL.');
+        }
+
+        const imageData = {
+            url: image.url,
+            name: image.name || data.filename || 'mora-generated-image.png',
+            prompt,
+            provider: image.provider || data.provider,
+            model: image.model || data.model,
+            mime: image.mime,
+            bytes: image.bytes
+        };
+
+        state.imageResults.unshift(imageData);
+
+        addMessage(
+            'assistant',
+            `Your image has been generated using ${imageData.provider || 'the selected provider'}.`,
+            [imageData]
+        );
+
+        setOutput(
+            `Image generation completed.\nProvider: ${imageData.provider || 'Unknown'}\nModel: ${imageData.model || 'Default'}\nFile: ${imageData.name}`
+        );
+
+        if (!state.conversationId) {
+            state.conversationTitle = deriveTitle();
+        }
+
+        updateTopTitle();
+
+        await saveConversation(false);
+
+        toast('Image generated successfully.', 'success');
+    } catch (error) {
+        if (error.name === 'AbortError') {
+            addMessage('assistant', 'Image generation was stopped.');
+        } else {
+            addMessage(
+                'assistant',
+                `Image generation failed.\n\n**Error:** ${error.message}`
+            );
+
+            toast(error.message, 'error');
+        }
+    } finally {
+        if (requestId === state.requestId) {
+            hideTyping();
+            updateBusyUI(false);
+            state.abortController = null;
+            state.imageAttachment = null;
+            updateAttachmentChip();
+        }
+    }
+}
+
+/* ---------------------------- PROJECTS ---------------------------- */
+
+async function saveProject() {
+    if (!state.files.length) {
+        toast('Create or generate some files before saving a project.', 'error');
+        return;
+    }
+
+    $('projectTitle').value = state.projectTitle ||
+        (state.conversationTitle !== 'New conversation'
+            ? state.conversationTitle
+            : 'My Mora AI project');
+
+    $('projectPrompt').value = state.messages
+        .filter(message => message.role === 'user')
+        .map(getMessageText)
+        .slice(-5)
+        .join('\n\n')
+        .slice(0, 12000);
+
+    openModal('projectModal');
+}
+
+async function confirmSaveProject() {
+    const title = $('projectTitle').value.trim();
+
+    if (!title) {
+        toast('Enter a project title.', 'error');
+        return;
+    }
+
+    try {
+        const data = await api('/api/projects', {
+            method: 'POST',
+            body: {
+                id: state.projectId || undefined,
+                title,
+                prompt: $('projectPrompt').value,
+                files: state.files
+            }
+        });
+
+        state.projectId = data.project.id;
+        state.projectTitle = data.project.title;
+
+        closeModal('projectModal');
+
+        toast('Project saved successfully.', 'success');
+
+        await refreshProjects();
+    } catch (error) {
+        toast(`Could not save project: ${error.message}`, 'error');
+    }
+}
+
+async function refreshProjects() {
+    try {
+        const data = await api('/api/projects');
+        const projects = data.projects || [];
+
+        const side = $('projectList');
+        side.innerHTML = '';
+
+        if (!projects.length) {
+            side.innerHTML = '<div class="empty-state">No saved projects yet.</div>';
+        } else {
+            projects.slice(0, 10).forEach(project => {
+                const button = document.createElement('button');
+                button.className = 'side-item';
+                button.textContent = project.title || 'Untitled project';
+                button.title = button.textContent;
+
+                button.addEventListener('click', () => {
+                    loadProject(project.id);
+                    closeSidebar();
+                });
+
+                side.appendChild(button);
+            });
+        }
+
+        const modal = $('projectsContent');
+        modal.innerHTML = '';
+
+        if (!projects.length) {
+            modal.innerHTML = '<div class="empty-state">No projects have been saved.</div>';
+        } else {
+            projects.forEach(project => {
+                const row = document.createElement('div');
+                row.className = 'file-row';
+
+                const name = document.createElement('span');
+                name.textContent = project.title || 'Untitled project';
+
+                const buttons = document.createElement('div');
+                buttons.style.display = 'flex';
+                buttons.style.gap = '8px';
+
+                const open = document.createElement('button');
+                open.textContent = 'Open';
+                open.addEventListener('click', () => loadProject(project.id));
+
+                const exportButton = document.createElement('button');
+                exportButton.textContent = 'ZIP';
+                exportButton.addEventListener('click', () => exportProject(project.id));
+
+                buttons.append(open, exportButton);
+                row.append(name, buttons);
+                modal.appendChild(row);
+            });
+        }
+    } catch (error) {
+        console.warn('Unable to load projects:', error.message);
+    }
+}
+
+async function loadProject(id) {
+    try {
+        const data = await api(`/api/projects/${encodeURIComponent(id)}`);
+        const project = data.project;
+
+        if (!project) {
+            throw new Error('Project not found.');
+        }
+
+        state.projectId = project.id;
+        state.projectTitle = project.title || 'Project';
+        state.conversationId = null;
+        state.conversationTitle = state.projectTitle;
+        state.files = Array.isArray(project.files)
+            ? project.files.map(file => ({
+                name: file.name,
+                path: file.path || file.name,
+                content: file.content || ''
+            }))
+            : [];
+
+        state.selectedFile = state.files[0]?.name || '';
+        state.canvas = null;
+
+        renderFiles();
+        updateTopTitle();
+        openWorkspace('files');
+
+        if (state.files.length) {
+            const htmlFile = state.files.find(file =>
+                file.name.toLowerCase().endsWith('.html')
+            );
+
+            if (htmlFile) {
+                state.canvas = {
+                    type: 'html',
+                    html: htmlFile.content
+                };
+
+                refreshPreview();
+            }
+        }
+
+        closeModal('projectsModal');
+
+        toast('Project opened.', 'success');
+    } catch (error) {
+        toast(`Unable to open project: ${error.message}`, 'error');
+    }
+}
+
+async function exportProject(id) {
+    try {
+        const response = await fetch(
+            endpoint(`/api/projects/${encodeURIComponent(id)}/export.zip`),
+            {
+                headers: requestHeaders()
+            }
+        );
+
+        if (!response.ok) {
+            let message = `ZIP export failed (HTTP ${response.status}).`;
+
+            try {
+                const data = await response.json();
+                message = data.error || message;
+            } catch {}
+
+            throw new Error(message);
+        }
+
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+
+        const anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.download = `${(state.projectTitle || 'mora-project')
+            .replace(/[^a-zA-Z0-9_-]/g, '_')}.zip`;
+
+        document.body.appendChild(anchor);
+        anchor.click();
+        anchor.remove();
+
+        setTimeout(() => URL.revokeObjectURL(url), 3000);
+
+        toast('Project ZIP downloaded.', 'success');
+    } catch (error) {
+        toast(error.message, 'error');
+    }
+}
+
+/* ---------------------------- HISTORY AND GALLERY ---------------------------- */
+
+async function showHistory() {
+    openModal('historyModal');
+    $('historyContent').innerHTML =
+        '<div class="empty-state">Loading history...</div>';
+
+    try {
+        const data = await api('/api/history');
+        const history = data.history || [];
+
+        $('historyContent').innerHTML = '';
+
+        if (!history.length) {
+            $('historyContent').innerHTML =
+                '<div class="empty-state">No activity has been recorded yet.</div>';
+            return;
+        }
+
+        history.forEach(item => {
+            const row = document.createElement('div');
+            row.className = 'file-row';
+
+            const details = document.createElement('div');
+            details.style.minWidth = '0';
+
+            const prompt = document.createElement('div');
+            prompt.style.fontWeight = '700';
+            prompt.textContent = item.prompt || 'AI request';
+
+            const meta = document.createElement('div');
+            meta.style.color = 'var(--muted)';
+            meta.style.fontSize = '10px';
+            meta.style.marginTop = '5px';
+
+            const date = item.createdAt
+                ? new Date(item.createdAt).toLocaleString()
+                : '';
+
+            meta.textContent =
+                `${item.provider || 'AI'} · ${date}`;
+
+            details.append(prompt, meta);
+            row.appendChild(details);
+            $('historyContent').appendChild(row);
+        });
+    } catch (error) {
+        $('historyContent').textContent = error.message;
+    }
+}
+
+async function clearHistory() {
+    if (!confirm('Clear all recorded activity? This cannot be undone.')) {
+        return;
+    }
+
+    try {
+        await api('/api/history', { method: 'DELETE' });
+        $('historyContent').innerHTML =
+            '<div class="empty-state">History cleared.</div>';
+
+        toast('History cleared.', 'success');
+    } catch (error) {
+        toast(error.message, 'error');
+    }
+}
+
+async function showGallery() {
+    openModal('galleryModal');
+
+    const container = $('galleryContent');
+    container.innerHTML = '<div class="empty-state">Loading images...</div>';
+
+    try {
+        const data = await api('/api/conversations');
+        const conversations = data.conversations || [];
+        const images = [];
+
+        // The conversation-list endpoint returns summaries. Load each
+        // conversation separately to retrieve its saved image references.
+        for (const item of conversations.slice(0, 40)) {
+            try {
+                const detail = await api(
+                    `/api/conversations/${encodeURIComponent(item.id)}`
+                );
+
+                for (const message of detail.conversation?.messages || []) {
+                    for (const image of message.images || []) {
+                        if (image?.url) {
+                            images.push({
+                                ...image,
+                                conversationTitle: item.title || 'Conversation'
+                            });
+                        }
+                    }
+                }
+            } catch (error) {
+                console.warn('Unable to load gallery item:', error.message);
+            }
+        }
+
+        container.innerHTML = '';
+
+        if (!images.length) {
+            container.innerHTML =
+                '<div class="empty-state">No saved images were found in your conversations.</div>';
+            return;
+        }
+
+        images.forEach(image => {
+            const card = document.createElement('div');
+            card.className = 'file-row';
+            card.style.alignItems = 'flex-start';
+
+            const details = document.createElement('div');
+            details.style.minWidth = '0';
+
+            const title = document.createElement('div');
+            title.textContent = image.prompt || image.conversationTitle;
+            title.style.fontWeight = '700';
+
+            const img = document.createElement('img');
+            img.src = safeImageUrl(image.url);
+            img.alt = image.prompt || 'Saved image';
+            img.loading = 'lazy';
+            img.style.width = '100%';
+            img.style.maxWidth = '260px';
+            img.style.borderRadius = '9px';
+            img.style.marginTop = '8px';
+
+            const download = document.createElement('button');
+            download.textContent = 'Download';
+            download.style.marginTop = '8px';
+
+            download.addEventListener('click', () => {
+                downloadUrl(
+                    safeImageUrl(image.url),
+                    image.name || 'mora-image.png'
+                );
+            });
+
+            details.append(title, img, download);
+            card.appendChild(details);
+            container.appendChild(card);
+        });
+    } catch (error) {
+        container.textContent = error.message;
+    }
+}
+
+/* ---------------------------- MOBILE NAVIGATION ---------------------------- */
+
+function openSidebar() {
+    $('sidebar').classList.add('open');
+    $('mobileOverlay').classList.add('visible');
+}
+
+function closeSidebar() {
+    $('sidebar').classList.remove('open');
+    $('mobileOverlay').classList.remove('visible');
+}
+
+/* ---------------------------- INPUT AND EVENTS ---------------------------- */
+
+function autoResizePrompt() {
+    const input = $('promptInput');
+    input.style.height = 'auto';
+    input.style.height = `${Math.min(input.scrollHeight, 180)}px`;
+}
+
+$('promptInput').addEventListener('input', () => {
+    autoResizePrompt();
+    writeStorage(STORAGE_KEYS.draft, $('promptInput').value);
+});
+
+$('promptInput').addEventListener('keydown', event => {
+    if (event.key === 'Enter' && !event.shiftKey && !event.isComposing) {
+        event.preventDefault();
+        runChat();
+    }
+});
+
+$('sendBtn').addEventListener('click', runChat);
+$('stopBtn').addEventListener('click', stopGeneration);
+
+$('newChatBtn').addEventListener('click', () => {
+    newConversation();
+    closeSidebar();
+});
+
+$('clearBtn').addEventListener('click', () => {
+    $('promptInput').value = '';
+    writeStorage(STORAGE_KEYS.draft, '');
+    autoResizePrompt();
+});
+
+$('menuBtn').addEventListener('click', () => {
+    if ($('sidebar').classList.contains('open')) {
+        closeSidebar();
+    } else {
+        openSidebar();
+    }
+});
+
+$('mobileOverlay').addEventListener('click', closeSidebar);
+
+$('settingsBtn').addEventListener('click', async () => {
+    openModal('settingsModal');
+    await checkServer();
+});
+
+$('topSettingsBtn').addEventListener('click', async () => {
+    openModal('settingsModal');
+    await checkServer();
+});
+
+$('saveSettingsBtn').addEventListener('click', saveSettings);
+$('testServerBtn').addEventListener('click', testServer);
+
+$('resetSettingsBtn').addEventListener('click', () => {
+    if (!confirm('Clear all saved Mora AI settings from this browser?')) {
+        return;
+    }
+
+    Object.values(STORAGE_KEYS).forEach(removeStorage);
+
+    loadSettings();
+    toast('Local settings cleared. Enter your settings again.', 'success');
+});
+
+$('textProvider').addEventListener('change', updateModelBadge);
+$('textModel').addEventListener('input', updateModelBadge);
+
+$('modeSelect').addEventListener('change', () => {
+    const mode = $('modeSelect').value;
+
+    const placeholders = {
+        chat: 'Message Mora AI...',
+        code: 'Describe the code or application you want to build...',
+        image: 'Describe the image you want Mora AI to generate...'
+    };
+
+    $('promptInput').placeholder = placeholders[mode] || placeholders.chat;
+
+    if (mode === 'image') {
+        $('modelBadge').textContent =
+            $('imageModel').value.trim() || 'Image mode';
+    } else {
+        updateModelBadge();
+    }
+});
+
+$('attachImageBtn').addEventListener('click', () => {
+    $('imageInput').click();
+});
+
+$('imageInput').addEventListener('change', async event => {
+    const file = event.target.files?.[0];
+
+    await handleImageSelected(file);
+
+    event.target.value = '';
+});
+
+$('removeAttachmentBtn').addEventListener('click', () => {
+    state.imageAttachment = null;
+    updateAttachmentChip();
+});
+
+$('workspaceBtn').addEventListener('click', () => {
+    openWorkspace();
+});
+
+$('workspaceNav').addEventListener('click', () => {
+    openWorkspace();
+    closeSidebar();
+});
+
+$('openWorkspaceBtn').addEventListener('click', () => {
+    $('workspace').classList.contains('visible')
+        ? closeWorkspace()
+        : openWorkspace();
+});
+
+$('closeWorkspaceBtn').addEventListener('click', closeWorkspace);
+
+document.querySelectorAll('.workspace-tab').forEach(button => {
+    button.addEventListener('click', () => {
+        setWorkspacePane(button.dataset.pane);
+    });
+});
+
+$('refreshPreviewBtn').addEventListener('click', refreshPreview);
+
+$('fileSelect').addEventListener('change', () => {
+    const selected = state.files.find(file =>
+        file.name === $('fileSelect').value
+    );
+
+    if (selected) {
+        state.selectedFile = selected.name;
+        $('fileEditor').value = selected.content;
+    }
+});
+
+$('saveFileBtn').addEventListener('click', saveEditorChanges);
+
+$('downloadFileBtn').addEventListener('click', () => {
+    const file = state.files.find(item =>
+        item.name === state.selectedFile
+    );
+
+    if (!file) {
+        toast('Select a file first.', 'error');
+        return;
+    }
+
+    downloadBlob(file.content, file.name);
+});
+
+$('newFileBtn').addEventListener('click', () => {
+    const name = prompt('Enter a filename, for example app.js:');
+
+    if (!name) return;
+
+    if (!/^[a-zA-Z0-9._ -]+$/.test(name) || name === '.' || name === '..') {
+        toast('Use a simple filename without folders or special characters.', 'error');
+        return;
+    }
+
+    if (state.files.some(file => file.name === name)) {
+        toast('A file with that name already exists.', 'error');
+        return;
+    }
+
+    addOrUpdateFile({
+        name,
+        content: ''
+    });
+
+    renderFiles();
+    $('fileEditor').focus();
+});
+
+$('clearOutputBtn').addEventListener('click', () => {
+    setOutput('');
+});
+
+$('saveProjectBtn').addEventListener('click', saveProject);
+$('confirmSaveProject').addEventListener('click', confirmSaveProject);
+
+$('projectsNav').addEventListener('click', async () => {
+    openModal('projectsModal');
+    await refreshProjects();
+    closeSidebar();
+});
+
+$('historyNav').addEventListener('click', async () => {
+    await showHistory();
+    closeSidebar();
+});
+
+$('galleryNav').addEventListener('click', async () => {
+    await showGallery();
+    closeSidebar();
+});
+
+$('clearHistoryBtn').addEventListener('click', clearHistory);
+
+document.querySelectorAll('[data-close]').forEach(button => {
+    button.addEventListener('click', () => {
+        closeModal(button.dataset.close);
+    });
+});
+
+document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+    backdrop.addEventListener('click', event => {
+        if (event.target === backdrop) {
+            backdrop.classList.remove('visible');
+        }
+    });
+});
+
+document.addEventListener('keydown', event => {
+    if (event.key === 'Escape') {
+        document.querySelectorAll('.modal-backdrop.visible').forEach(modal => {
+            modal.classList.remove('visible');
+        });
+
+        closeSidebar();
+    }
+});
+
+document.addEventListener('click', async event => {
+    const copyButton = event.target.closest('[data-copy-code]');
+
+    if (!copyButton) return;
+
+    const index = Number(copyButton.dataset.copyCode);
+
+    const blocks = [...document.querySelectorAll('.code-block')];
+    const block = blocks.find(node =>
+        node.querySelector(`[data-copy-code="${index}"]`) === copyButton
+    );
+
+    const code = block?.querySelector('pre code')?.textContent;
+
+    if (code !== undefined) {
+        await copyText(code);
+    }
+});
+
+document.querySelectorAll('.suggestion').forEach(button => {
+    button.addEventListener('click', () => {
+        $('promptInput').value = button.dataset.prompt || '';
+        $('promptInput').focus();
+        autoResizePrompt();
+    });
+});
+
+/* ---------------------------- INITIALIZATION ---------------------------- */
+
+async function initialize() {
+    loadSettings();
+    autoResizePrompt();
+
+    $('previewFrame').srcdoc = getHtmlForPreview();
+
+    await checkServer();
+
+    await Promise.allSettled([
+        refreshConversations(),
+        refreshProjects()
+    ]);
+}
+
+initialize();
+</script>
+
+</body>
+  </html>
